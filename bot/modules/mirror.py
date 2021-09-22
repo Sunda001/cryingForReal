@@ -33,7 +33,7 @@ from bot.helper.mirror_utils.status_utils.split_status import SplitStatus
 from bot.helper.mirror_utils.status_utils.upload_status import UploadStatus
 from bot.helper.mirror_utils.status_utils.tg_upload_status import TgUploadStatus
 from bot.helper.mirror_utils.status_utils.gdownload_status import DownloadStatus
-from bot.helper.mirror_utils.upload_utils import gdriveTools, pyrogramEngine
+from bot.helper.mirror_utils.upload_utils import pyrogramEngine
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.message_utils import *
@@ -161,12 +161,6 @@ class MirrorListener(listeners.MirrorListeners):
             tg.upload()
         else:
             LOGGER.info(f"Upload Name: {up_name}")
-            drive = gdriveTools.GoogleDriveHelper(up_name, self)
-            upload_status = UploadStatus(drive, size, gid, self)
-            with download_dict_lock:
-                download_dict[self.uid] = upload_status
-            update_all_messages()
-            drive.upload(up_name)
 
     def onDownloadError(self, error):
         error = error.replace('<', ' ')
@@ -411,40 +405,6 @@ def _mirror(bot, update, isTar=False, extract=False, isZip=False, isQbit=False, 
                 return
 
     listener = MirrorListener(bot, update, pswd, isTar, extract, isZip, isQbit, isLeech)
-
-    if bot_utils.is_gdrive_link(link):
-        if not isTar and not extract and not isLeech:
-            sendMessage(f"Use /{BotCommands.CloneCommand} to clone Google Drive file/folder\nUse /{BotCommands.TarMirrorCommand} to make tar of Google Drive folder\nUse /{BotCommands.UnzipMirrorCommand} to extracts archive Google Drive file", bot, update)
-            return
-        res, size, name, files = gdriveTools.GoogleDriveHelper().clonehelper(link)
-        if res != "":
-            sendMessage(res, bot, update)
-            return
-        if TAR_UNZIP_LIMIT is not None:
-            result = bot_utils.check_limit(size, TAR_UNZIP_LIMIT)
-            if result:
-                msg = f'Failed, Tar/Unzip limit is {TAR_UNZIP_LIMIT}.\nYour File/Folder size is {get_readable_file_size(size)}.'
-                sendMessage(msg, bot, update)
-                return
-        LOGGER.info(f"Download Name : {name}")
-        drive = gdriveTools.GoogleDriveHelper(name, listener)
-        gid = ''.join(random.SystemRandom().choices(string.ascii_letters + string.digits, k=12))
-        download_status = DownloadStatus(drive, size, listener, gid)
-        with download_dict_lock:
-            download_dict[listener.uid] = download_status
-        sendStatusMessage(update, bot)
-        drive.download(link)
-
-    elif bot_utils.is_mega_link(link):
-        if BLOCK_MEGA_LINKS:
-            sendMessage("Mega links are blocked!", bot, update)
-            return
-        link_type = bot_utils.get_mega_link_type(link)
-        if link_type == "folder" and BLOCK_MEGA_FOLDER:
-            sendMessage("Mega folder are blocked!", bot, update)
-        else:
-            mega_dl = MegaDownloadHelper()
-            mega_dl.add_download(link, f'{DOWNLOAD_DIR}{listener.uid}/', listener)
 
     elif isQbit and (bot_utils.is_magnet(link) or os.path.exists(link)):
         qbit = QbitTorrent()
