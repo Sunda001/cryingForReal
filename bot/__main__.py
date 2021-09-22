@@ -68,24 +68,6 @@ def log(update, context):
 
 help_string_telegraph = f'''<br>
 <br><br>
-<b>/{BotCommands.LeechCommand}</b> This command should be used as reply to Magnet link, Torrent link, or Direct link. [this command will SPAM the chat and send the downloads a seperate files, if there is more than one file, in the specified Torrent]
-<br><br>
-<b>/{BotCommands.TarLeechCommand}</b> This command should be used as reply to Magnet link, Torrent link, or Direct link and upload it as (.tar). [this command will SPAM the chat and send the downloads a seperate files, if there is more than one file, in the specified Torrent]
-<br><br>
-<b>/{BotCommands.ZipLeechCommand}</b> This command should be used as reply to Magnet link, Torrent link, or Direct link and upload it as (.zip). [this command will SPAM the chat and send the downloads a seperate files, if there is more than one file, in the specified Torrent]
-<br><br>
-<b>/{BotCommands.UnzipLeechCommand}</b> This command should be used as reply to Magnet link, Torrent link, or Direct link and if file is any archive, extracts it. [this command will SPAM the chat and send the downloads a seperate files, if there is more than one file, in the specified Torrent]
-<br><br>
-<b>/{BotCommands.QbLeechCommand}</b> This command should be used as reply to Magnet link, Torrent link, or Direct link using qBittorrent. [this command will SPAM the chat and send the downloads a seperate files, if there is more than one file, in the specified Torrent]
-<br><br>
-<b>/{BotCommands.QbTarLeechCommand}</b> This command should be used as reply to Magnet link, Torrent link, or Direct link and upload it as (.tar) using qBittorrent. [this command will SPAM the chat and send the downloads a seperate files, if there is more than one file, in the specified Torrent]
-<br><br>
-<b>/{BotCommands.QbZipLeechCommand}</b> This command should be used as reply to Magnet link, Torrent link, or Direct link and upload it as (.zip) using qBittorrent. [this command will SPAM the chat and send the downloads a seperate files, if there is more than one file, in the specified Torrent]
-<br><br>
-<b>/{BotCommands.QbUnzipLeechCommand}</b> This command should be used as reply to Magnet link, Torrent link, or Direct link and if file is any archive, extracts it using qBittorrent. [this command will SPAM the chat and send the downloads a seperate files, if there is more than one file, in the specified Torrent]
-<br><br>
-<b>/{BotCommands.LeechWatchCommand}</b> Leech through youtube-dl 
-<br><br>
 <b>/{BotCommands.LeechTarWatchCommand}</b> Leech through youtube-dl and tar before uploading 
 <br><br>
 <b>/{BotCommands.LeechZipWatchCommand}</b> Leech through youtube-dl and zip before uploading 
@@ -96,27 +78,48 @@ help_string_telegraph = f'''<br>
 <br><br>
 <b>/{BotCommands.CancelMirror}</b>: Reply to the message by which the download was initiated and that download will be cancelled
 <br><br>
-<b>/{BotCommands.CancelAllCommand}</b>: Cancel all running tasks
+<b>/{BotCommands.CancelAllCommand}</b>: Cancel all running tasks [OWNER-ONLY]
 <br><br>
 <b>/{BotCommands.StatusCommand}</b>: Shows a status of all the downloads
 <br><br>
 <b>/{BotCommands.StatsCommand}</b>: Show Stats of the machine the bot is hosted on
 '''
 help = Telegraph(access_token=telegraph_token).create_page(
-        title='Mirrorbot Help',
+        title='PubliLeech Help',
         html_content=help_string_telegraph,
     )["path"]
 
 help_string = f'''
-/{BotCommands.PingCommand}: Check how long it takes to Ping the Bot
+/{BotCommands.LeechCommand}: Leech Torrent/Direct link
 
 
-/{BotCommands.SpeedCommand}: Check Internet Speed of the Host
+/{BotCommands.TarLeechCommand}: Leech Torrent/Direct link and upload as .tar
+
+
+/{BotCommands.ZipLeechCommand}: Leech Torrent/Direct link and upload as .zip
+
+
+/{BotCommands.UnzipLeechCommand}: Leech Torrent/Direct link and extract
+
+
+/{BotCommands.QbLeechCommand}: Leech  Torrent/Magnet using qBittorrent
+
+
+/{BotCommands.QbTarLeechCommand}: Leech Torrent/Magnet and upload as .tar using qb
+
+
+/{BotCommands.QbZipLeechCommand}: Leech Torrent/Magnet and upload as .zip using qb
+
+
+/{BotCommands.QbUnzipLeechCommand}: Leech Torrent/Direct link and extract
+
+
+/{BotCommands.LeechWatchCommand}: Leech through Youtube-dl supported link and Upload to Telegram
 '''
 
 def bot_help(update, context):
     button = button_build.ButtonMaker()
-    button.buildbutton("Other Commands", f"https://telegra.ph/{help}")
+    button.buildbutton("Click Here For Other Commands", f"https://telegra.ph/{help}")
     reply_markup = InlineKeyboardMarkup(button.build_menu(1))
     sendMarkup(help_string, context.bot, update, reply_markup)
 
