@@ -1,5 +1,5 @@
 from bot import aria2, download_dict_lock, STOP_DUPLICATE, TORRENT_DIRECT_LIMIT, TAR_UNZIP_LIMIT
-from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
+
 from bot.helper.ext_utils.bot_utils import *
 from bot.helper.mirror_utils.status_utils.aria_download_status import AriaDownloadStatus
 from bot.helper.telegram_helper.message_utils import *
@@ -27,12 +27,6 @@ class AriaDownloadHelper:
             if dl.getListener().extract:
                 smsg = None
             else:
-                gdrive = GoogleDriveHelper()
-                smsg, button = gdrive.drive_list(sname, True)
-            if smsg:
-                dl.getListener().onDownloadError('File/Folder already available in Drive.\n\n')
-                aria2.remove([download], force=True)
-                sendMarkup("Here are the search results:", dl.getListener().bot, dl.getListener().update, button)
                 return
         if (TORRENT_DIRECT_LIMIT is not None or TAR_UNZIP_LIMIT is not None) and dl is not None:
             sleep(1)
