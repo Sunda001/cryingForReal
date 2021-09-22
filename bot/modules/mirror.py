@@ -405,7 +405,6 @@ def _mirror(bot, update, isTar=False, extract=False, isZip=False, isQbit=False, 
                 return
 
     listener = MirrorListener(bot, update, pswd, isTar, extract, isZip, isQbit, isLeech)
-
     elif isQbit and (bot_utils.is_magnet(link) or os.path.exists(link)):
         qbit = QbitTorrent()
         qbit.add_torrent(link, f'{DOWNLOAD_DIR}{listener.uid}/', listener, qbitsel)
