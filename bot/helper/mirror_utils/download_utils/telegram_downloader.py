@@ -2,10 +2,10 @@ import logging
 import threading
 import time
 from bot import LOGGER, download_dict, download_dict_lock, app, STOP_DUPLICATE
-
+from .download_helper import DownloadHelper
 from ..status_utils.telegram_download_status import TelegramDownloadStatus
 from bot.helper.telegram_helper.message_utils import sendMarkup, sendStatusMessage
-from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
+
 
 global_lock = threading.Lock()
 GLOBAL_GID = set()
