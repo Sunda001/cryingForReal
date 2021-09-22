@@ -2,7 +2,7 @@ import logging
 import threading
 import time
 from bot import LOGGER, download_dict, download_dict_lock, app, STOP_DUPLICATE
-from .download_helper import DownloadHelper
+
 from ..status_utils.telegram_download_status import TelegramDownloadStatus
 from bot.helper.telegram_helper.message_utils import sendMarkup, sendStatusMessage
 from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
@@ -100,11 +100,6 @@ class TelegramDownloadHelper(DownloadHelper):
 
             if download:
                 if STOP_DUPLICATE and not self.__listener.isLeech:
-                    LOGGER.info('Checking File/Folder if already in Drive...')
-                    gd = GoogleDriveHelper()
-                    smsg, button = gd.drive_list(name, True, True)
-                    if smsg:
-                        sendMarkup("File/Folder is already available in Drive.\nHere are the search results:", self.__listener.bot, self.__listener.update, button)
                         return
                 sendStatusMessage(self.__listener.update, self.__listener.bot)
                 self.__onDownloadStart(name, media.file_size, media.file_id)
