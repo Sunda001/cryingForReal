@@ -98,8 +98,6 @@ help_string_telegraph = f'''<br>
 <br><br>
 <b>/{BotCommands.CancelAllCommand}</b>: Cancel all running tasks
 <br><br>
-<b>/{BotCommands.ListCommand}</b> [search term]: Searches the search term in the Google Drive, If found replies with the link
-<br><br>
 <b>/{BotCommands.StatusCommand}</b>: Shows a status of all the downloads
 <br><br>
 <b>/{BotCommands.StatsCommand}</b>: Show Stats of the machine the bot is hosted on
@@ -114,8 +112,6 @@ help_string = f'''
 
 
 /{BotCommands.SpeedCommand}: Check Internet Speed of the Host
-
-/{BotCommands.ShellCommand}: Run commands in Shell (Only Owner)
 '''
 
 def bot_help(update, context):
