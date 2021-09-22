@@ -5,7 +5,7 @@ from bot.helper.telegram_helper.message_utils import *
 import os
 from bot.helper.ext_utils.bot_utils import new_thread, get_mega_link_type, get_readable_file_size, check_limit
 from bot.helper.mirror_utils.status_utils.mega_download_status import MegaDownloadStatus
-from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
+
 from bot import MEGA_LIMIT, STOP_DUPLICATE, TAR_UNZIP_LIMIT
 import random
 import string
@@ -175,12 +175,6 @@ class MegaDownloadHelper:
             if listener.extract:
                 smsg = None
             else:
-                gd = GoogleDriveHelper()
-                smsg, button = gd.drive_list(mname, True)
-            if smsg:
-                msg1 = "File/Folder is already available in Drive.\nHere are the search results:"
-                sendMarkup(msg1, listener.bot, listener.update, button)
-                executor.continue_event.set()
                 return
         if MEGA_LIMIT is not None or TAR_UNZIP_LIMIT is not None:
             size = api.getSize(node)
