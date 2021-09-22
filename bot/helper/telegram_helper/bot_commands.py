@@ -13,5 +13,7 @@ class _BotCommands:
         self.LeechWatchCommand = 'leechwatch'
         self.LeechTarWatchCommand = 'leechtarwatch'
         self.LeechZipWatchCommand = 'leechzipwatch'
+        self.CancelMirror = 'cancel'
+        self.CancelAllCommand = 'cancelall'
 
 BotCommands = _BotCommands()
