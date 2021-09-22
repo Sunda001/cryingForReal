@@ -24,5 +24,8 @@ class _BotCommands:
         self.LogCommand = 'log'
         self.SpeedCommand = 'speedtest'
         self.StatusCommand = 'status'
+        self.AuthorizedUsersCommand = 'users'
+        self.AuthorizeCommand = 'authorize'
+        self.UnAuthorizeCommand = 'unauthorize'
 
 BotCommands = _BotCommands()
