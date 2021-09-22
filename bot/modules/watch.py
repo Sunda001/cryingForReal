@@ -58,8 +58,6 @@ def leechWatchTar(update, context):
 def leechWatchZip(update, context):
     _watch(context.bot, update, True, True, True)
 
-watch_handler = CommandHandler(BotCommands.WatchCommand, watch,
-                                filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
 tar_watch_handler = CommandHandler(BotCommands.TarWatchCommand, watchTar,
                                     filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
 zip_watch_handler = CommandHandler(BotCommands.ZipWatchCommand, watchZip,
