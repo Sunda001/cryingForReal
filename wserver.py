@@ -25,7 +25,7 @@ page = """
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Torrent File Selector</title>
+    <title>PublicLeech-Torrent File Selector</title>
     <link rel="icon" href="https://telegra.ph/file/fccbfe094464a939b9f37.jpg" type="image/jpg">
     <script
       src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
@@ -202,16 +202,12 @@ input[type="submit"]:hover, input[type="submit"]:focus{
     <header>
       <div class="brand">
         <img
-          src="https://telegra.ph/file/a97fb49ff2498018a59a7.png"
+          src="https://telegra.ph/file/fccbfe094464a939b9f37.jpg"
           alt="logo"
         />
-        <a href="https://t.me/PublicLeechCloneGroup"> 
+        <a href="t.me/PublicLeechCloneGroup"> 
           <h2 class="name">PublicLeech</h2>
         </a>
-      </div>
-      <div class="social">
-        <a href="https://github.com/SlamDevs/slam-mirrorbot"><i class="fab fa-github"></i></a>
-        <a href="https://t.me/SlamMirrorUpdates"><i class="fab fa-telegram"></i></a>
       </div>
     </header>
     <section>
@@ -533,10 +529,6 @@ section span{
         <a href="https://t.me/PublicLeechCloneGroup">
           <h2 class="name">PublicLeech</h2>
         </a>
-      </div>
-      <div class="social">
-        <a href="https://github.com/SlamDevs/slam-mirrorbot"><i class="fab fa-github"></i></a>
-        <a href="https://t.me/SlamMirrorUpdates"><i class="fab fa-telegram"></i></a>
       </div>
     </header>
     <section>
