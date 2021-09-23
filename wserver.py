@@ -26,7 +26,7 @@ page = """
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Torrent File Selector</title>
-    <link rel="icon" href="https://telegra.ph/file/a97fb49ff2498018a59a7.png" type="image/jpg">
+    <link rel="icon" href="https://telegra.ph/file/fccbfe094464a939b9f37.jpg" type="image/jpg">
     <script
       src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
       integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs="
@@ -200,6 +200,19 @@ input[type="submit"]:hover, input[type="submit"]:focus{
 <body>
   <!--© Designed and coded by @bipuldey19-Telegram-->
     <header>
+      <div class="brand">
+        <img
+          src="https://telegra.ph/file/a97fb49ff2498018a59a7.png"
+          alt="logo"
+        />
+        <a href="https://t.me/PublicLeechCloneGroup"> 
+          <h2 class="name">PublicLeech</h2>
+        </a>
+      </div>
+      <div class="social">
+        <a href="https://github.com/SlamDevs/slam-mirrorbot"><i class="fab fa-github"></i></a>
+        <a href="https://t.me/SlamMirrorUpdates"><i class="fab fa-telegram"></i></a>
+      </div>
     </header>
     <section>
       <h2 class="intro">Select the files you want to download</h2>
@@ -512,6 +525,19 @@ section span{
 <body>
    <!--© Designed and coded by @bipuldey19-Telegram-->
     <header>
+      <div class="brand">
+        <img
+          src="https://telegra.ph/file/fccbfe094464a939b9f37.jpg"
+          alt="logo"
+        />
+        <a href="https://t.me/PublicLeechCloneGroup">
+          <h2 class="name">PublicLeech</h2>
+        </a>
+      </div>
+      <div class="social">
+        <a href="https://github.com/SlamDevs/slam-mirrorbot"><i class="fab fa-github"></i></a>
+        <a href="https://t.me/SlamMirrorUpdates"><i class="fab fa-telegram"></i></a>
+      </div>
     </header>
     <section>
       <form action="{form_url}">
@@ -573,7 +599,7 @@ async def list_torrent_contents(request):
 
     rend_page = page.replace("{My_content}", cont[0])
     rend_page = rend_page.replace(
-        "{form_url}", f"/slam/files/{torr}?pin_code={pincode}")
+        "{form_url}", f"/PublicLeech/files/{torr}?pin_code={pincode}")
     client.auth_log_out()
     return web.Response(text=rend_page, content_type='text/html')
 
@@ -679,7 +705,7 @@ async def set_priority(request):
 @routes.get('/')
 async def homepage(request):
 
-    return web.Response(text="<h1>Join Public-Leech <a href='t.me/PublicLeechCloneGroup'>@Telegram</a>
+    return web.Response(text="<h1>Join PublicLeech <a href='t.me/PublicleechCloneGroup''>@GitHub</a> By <a href='https://github.com/SlamDevs'>SlamDevs</a></h1>", content_type="text/html")
 
 
 async def e404_middleware(app, handler):
@@ -689,11 +715,11 @@ async def e404_middleware(app, handler):
         try:
             response = await handler(request)
             if response.status == 404:
-                return web.Response(text="<h1>404: Page not found</h2><br><h3>Public-Leech</h3>", content_type="text/html")
+                return web.Response(text="<h1>404: Page not found</h2><br><h3>PublicLeech</h3>", content_type="text/html")
             return response
         except web.HTTPException as ex:
             if ex.status == 404:
-                return web.Response(text="<h1>404: Page not found</h2><br><h3>Public-Leech</h3>", content_type="text/html")
+                return web.Response(text="<h1>404: Page not found</h2><br><h3>PublicLeech</h3>", content_type="text/html")
             raise
     return middleware_handler
 
