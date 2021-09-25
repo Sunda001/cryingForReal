@@ -203,9 +203,9 @@ class MirrorListener(listeners.MirrorListeners):
                 sendMessage(msg, self.bot, self.update)
             else:
                 chat_id = str(self.message.chat.id)[4:]
-                msg = f"<b>Name:</b> <a href='https://t.me/c/{chat_id}/{self.uid}'>{link}</a>\n"
-                msg += f'<b>Total Files:</b> {count}\n'
-                msg += f'cc: {uname}\n\n'
+                msg = f"<b>🗂️ Name:</b> <a href='https://t.me/c/{chat_id}/{self.uid}'>{link}</a>\n\n"
+                msg += f'<b>🗄️ Total Files:</b> {count}\n\n'
+                msg += f'<b>👨🏻‍💻 Uploader:</b> {uname}\n\n\n'
                 fmsg = ''
                 for index, item in enumerate(list(files), start=1):
                     msg_id = files[item]
