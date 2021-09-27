@@ -68,6 +68,7 @@ def log(update, context):
     sendLogFile(context.bot, update)
 
 def dt(update, context):
+    now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
     print("Date and Time =", dt_string)
 
