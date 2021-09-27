@@ -3,7 +3,7 @@ import signal
 import os
 import asyncio
 
-from datetime import datetime
+from datetime import datetime as dt
 
 from pyrogram import idle
 from sys import executable
@@ -68,9 +68,13 @@ def log(update, context):
     sendLogFile(context.bot, update)
 
 def dt(update, context):
-    now = datetime.now()
-    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-    print("Date and Time =", dt_string)
+    dt_India = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
+    Indian_time = dt_India.strftime('%d-%b-%y %H:%M:%S')
+    UTC_time = dt.datetime.utcnow().strftime('%d-%b-%y %H:%M:%S')
+    max_len = len(max(['UTC Time', 'Indian Time'], key=len))
+    msg = {'UTC Time'   :<{max_len}} - {UTC_time}
+    msg = {'Indian Time':<{max_len}} - {Indian_time}
+    sendMessage(msg)
 
 help_string_telegraph = f'''<br>
 <br><br>
