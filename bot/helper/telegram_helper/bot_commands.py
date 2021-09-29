@@ -29,6 +29,5 @@ class _BotCommands:
         self.UnAuthorizeCommand = 'unauthorize'
         self.AddSudoCommand = 'addsudo'
         self.RmSudoCommand = 'rmsudo'
-        self.DTCommand = 'dt'
 
 BotCommands = _BotCommands()
