@@ -9,7 +9,7 @@ from bot.helper.telegram_helper.filters import CustomFilters
 import threading
 
 
-def _watch(bot: Bot, update, isTar=False, isZip=False, isLeech=False):
+def _watch(bot: Bot, update, isZip=False, isZip=False, isLeech=False):
     mssg = update.message.text
     message_args = mssg.split(' ')
     name_args = mssg.split('|')
@@ -44,7 +44,7 @@ def _watch(bot: Bot, update, isTar=False, isZip=False, isLeech=False):
       name = ""
     
     pswd = ""
-    listener = MirrorListener(bot, update, pswd, isTar, isZip=isZip, isLeech=isLeech)
+    listener = MirrorListener(bot, update, pswd, isZip, isLeech=isLeech)
     ydl = YoutubeDLHelper(listener)
     threading.Thread(target=ydl.add_download,args=(link, f'{DOWNLOAD_DIR}{listener.uid}', qual, name)).start()
     sendStatusMessage(update, bot)
@@ -60,11 +60,9 @@ def leechWatchZip(update, context):
 
 leech_watch_handler = CommandHandler(BotCommands.LeechWatchCommand, leechWatch,
                                 filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
-leech_tar_watch_handler = CommandHandler(BotCommands.LeechTarWatchCommand, leechWatchTar,
                                     filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
 leech_zip_watch_handler = CommandHandler(BotCommands.LeechZipWatchCommand, leechWatchZip,
                                     filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
 
 dispatcher.add_handler(leech_watch_handler)
-dispatcher.add_handler(leech_tar_watch_handler)
 dispatcher.add_handler(leech_zip_watch_handler)
