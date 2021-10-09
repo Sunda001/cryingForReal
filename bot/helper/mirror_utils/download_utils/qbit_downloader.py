@@ -17,7 +17,7 @@ from telegram.ext import CallbackQueryHandler
 
 from bot import download_dict, download_dict_lock, BASE_URL, dispatcher, get_client, TORRENT_DIRECT_LIMIT, ZIP_UNZIP_LIMIT, STOP_DUPLICATE
 from bot.helper.mirror_utils.status_utils.qbit_download_status import QbDownloadStatus
-from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
+
 from bot.helper.telegram_helper.message_utils import *
 from bot.helper.ext_utils.bot_utils import setInterval, new_thread, MirrorStatus, getDownloadByGid, get_readable_file_size
 from bot.helper.telegram_helper import button_build
@@ -163,17 +163,6 @@ class QbitTorrent:
                     if self.listener.isZip:
                         qbname = qbname + ".zip"
                     if not self.listener.extract:
-                        gd = GoogleDriveHelper()
-                        qbmsg, button = gd.drive_list(qbname, True)
-                        if qbmsg:
-                            msg = "File/Folder is already available in Drive."
-                            self.client.torrents_pause(torrent_hashes=self.ext_hash)
-                            time.sleep(0.3)
-                            self.listener.onDownloadError(msg)
-                            sendMarkup("Here are the search results:", self.listener.bot, self.listener.update, button)
-                            self.client.torrents_delete(torrent_hashes=self.ext_hash)
-                            self.client.auth_log_out()
-                            self.updater.cancel()
                             return
                     self.dupchecked = True
                 if not self.sizechecked:
