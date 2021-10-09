@@ -11,7 +11,7 @@ from telegram import ParseMode
 from telegram.ext import CommandHandler
 from telegraph import Telegraph
 from wserver import start_server_async
-from bot import bot, app, dispatcher, updater, botStartTime, IGNORE_PENDING_REQUESTS, IS_VPS, PORT, alive, web, OWNER_ID, AUTHORIZED_CHATS, telegraph_token
+from bot import bot, app, dispatcher, updater, botStartTime, IGNORE_PENDING_REQUESTS, IS_VPS, PORT, alive, nox, web, OWNER_ID, AUTHORIZED_CHATS, telegraph_token
 from bot.helper.ext_utils import fs_utils
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import *
@@ -45,14 +45,18 @@ def stats(update, context):
 
 
 def restart(update, context):
-    restart_message = sendMessage("Restarting, Please wait!", context.bot, update)
+    restart_message = sendMessage("Restarting...", context.bot, update)
     # Save restart message object in order to reply to it after restarting
     with open(".restartmsg", "w") as f:
         f.truncate(0)
         f.write(f"{restart_message.chat.id}\n{restart_message.message_id}\n")
     fs_utils.clean_all()
-    alive.terminate()
-    web.terminate()
+    alive.kill()
+    process = psutil.Process(web.pid)
+    for proc in process.children(recursive=True):
+        proc.kill()
+    process.kill()
+    nox.kill()
     os.execl(executable, executable, "-m", "bot")
 
 
@@ -67,8 +71,6 @@ def log(update, context):
     sendLogFile(context.bot, update)
 
 help_string_telegraph = f'''<br>
-<br><br>
-<b>/{BotCommands.LeechTarWatchCommand}</b> Leech through youtube-dl and tar before uploading 
 <br><br>
 <b>/{BotCommands.LeechZipWatchCommand}</b> Leech through youtube-dl and zip before uploading 
 <br><br>
@@ -93,9 +95,6 @@ help_string = f'''
 /{BotCommands.LeechCommand}: Leech Torrent/Direct link
 
 
-/{BotCommands.TarLeechCommand}: Leech Torrent/Direct link and upload as .tar
-
-
 /{BotCommands.ZipLeechCommand}: Leech Torrent/Direct link and upload as .zip
 
 
@@ -104,8 +103,6 @@ help_string = f'''
 
 /{BotCommands.QbLeechCommand}: Leech  Torrent/Magnet using qBittorrent
 
-
-/{BotCommands.QbTarLeechCommand}: Leech Torrent/Magnet and upload as .tar using qb
 
 
 /{BotCommands.QbZipLeechCommand}: Leech Torrent/Magnet and upload as .zip using qb
