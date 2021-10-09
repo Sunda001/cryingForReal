@@ -10,16 +10,16 @@ import logging
 import shutil
 
 import qbittorrentapi as qba
-from fnmatch import fnmatch
 from urllib.parse import urlparse, parse_qs
 from torrentool.api import Torrent
 from telegram import InlineKeyboardMarkup
 from telegram.ext import CallbackQueryHandler
 
-from bot import download_dict, download_dict_lock, BASE_URL, dispatcher, get_client, TORRENT_DIRECT_LIMIT, TAR_UNZIP_LIMIT
+from bot import download_dict, download_dict_lock, BASE_URL, dispatcher, get_client, TORRENT_DIRECT_LIMIT, TAR_UNZIP_LIMIT, STOP_DUPLICATE
 from bot.helper.mirror_utils.status_utils.qbit_download_status import QbDownloadStatus
+from bot.helper.mirror_utils.upload_utils.gdriveTools import GoogleDriveHelper
 from bot.helper.telegram_helper.message_utils import *
-from bot.helper.ext_utils.bot_utils import setInterval, new_thread, MirrorStatus, getDownloadByGid, get_readable_file_size, check_limit
+from bot.helper.ext_utils.bot_utils import setInterval, new_thread, MirrorStatus, getDownloadByGid, get_readable_file_size
 from bot.helper.telegram_helper import button_build
 
 LOGGER = logging.getLogger(__name__)
@@ -34,7 +34,8 @@ class QbitTorrent:
         self.update_interval = 2
         self.meta_time = time.time()
         self.stalled_time = time.time()
-        self.checked = False
+        self.sizechecked = False
+        self.dupchecked = False
 
     @new_thread
     def add_torrent(self, link, dire, listener, qbitsel):
@@ -61,6 +62,7 @@ class QbitTorrent:
                 os.remove(link)
             else:
                 op = self.client.torrents_add(link, save_path=dire)
+            time.sleep(0.3)
             if op.lower() == "ok.":
                 tor_info = self.client.torrents_info(torrent_hashes=self.ext_hash)
                 if len(tor_info) == 0:
@@ -78,10 +80,11 @@ class QbitTorrent:
                 self.client.torrents_delete(torrent_hashes=self.ext_hash, delete_files=True)
                 self.client.auth_log_out()
                 return
+            tor_info = tor_info[0]
+            self.ext_hash = tor_info.hash
             gid = ''.join(random.SystemRandom().choices(string.ascii_letters + string.digits, k=14))
             with download_dict_lock:
                 download_dict[listener.uid] = QbDownloadStatus(gid, listener, self.ext_hash, self.client)
-            tor_info = tor_info[0]
             LOGGER.info(f"QbitDownload started: {tor_info.name}")
             self.updater = setInterval(self.update_interval, self.update)
             if BASE_URL is not None and qbitsel:
@@ -153,23 +156,47 @@ class QbitTorrent:
                     self.updater.cancel()
             elif tor_info.state == "downloading":
                 self.stalled_time = time.time()
-                if (TORRENT_DIRECT_LIMIT is not None or TAR_UNZIP_LIMIT is not None) and not self.checked:
-                    if self.listener.isTar or self.listener.extract:
-                        is_tar_ext = True
-                        mssg = f'Tar/Unzip limit is {TAR_UNZIP_LIMIT}'
-                    else:
-                        is_tar_ext = False
-                        mssg = f'Torrent/Direct limit is {TORRENT_DIRECT_LIMIT}'
-                    size = tor_info.size
-                    result = check_limit(size, TORRENT_DIRECT_LIMIT, TAR_UNZIP_LIMIT, is_tar_ext)
-                    self.checked = True
-                    if result:
-                        self.client.torrents_pause(torrent_hashes=self.ext_hash)
-                        time.sleep(0.3)
-                        self.listener.onDownloadError(f"{mssg}.\nYour File/Folder size is {get_readable_file_size(size)}")
-                        self.client.torrents_delete(torrent_hashes=self.ext_hash)
-                        self.client.auth_log_out()
-                        self.updater.cancel()
+                if STOP_DUPLICATE and not self.listener.isLeech and not self.dupchecked and os.path.isdir(f'{self.dire}'):
+                    LOGGER.info('Checking File/Folder if already in Drive')
+                    qbname = str(os.listdir(f'{self.dire}')[0])
+                    if qbname.endswith('.!qB'):
+                        qbname = os.path.splitext(qbname)[0]
+                    if self.listener.isTar:
+                        qbname = qbname + ".zip" if self.listener.isZip else qbname + ".tar"
+                    if not self.listener.extract:
+                        gd = GoogleDriveHelper()
+                        qbmsg, button = gd.drive_list(qbname, True)
+                        if qbmsg:
+                            msg = "File/Folder is already available in Drive."
+                            self.client.torrents_pause(torrent_hashes=self.ext_hash)
+                            time.sleep(0.3)
+                            self.listener.onDownloadError(msg)
+                            sendMarkup("Here are the search results:", self.listener.bot, self.listener.update, button)
+                            self.client.torrents_delete(torrent_hashes=self.ext_hash)
+                            self.client.auth_log_out()
+                            self.updater.cancel()
+                            return
+                    self.dupchecked = True
+                if not self.sizechecked:
+                    limit = None
+                    if TAR_UNZIP_LIMIT is not None and (self.listener.isTar or self.listener.extract):
+                        mssg = f'Tar/Unzip limit is {TAR_UNZIP_LIMIT}GB'
+                        limit = TAR_UNZIP_LIMIT
+                    elif TORRENT_DIRECT_LIMIT is not None:
+                        mssg = f'Torrent limit is {TORRENT_DIRECT_LIMIT}GB'
+                        limit = TORRENT_DIRECT_LIMIT
+                    if limit is not None:
+                        LOGGER.info('Checking File/Folder Size...')
+                        time.sleep(1)
+                        size = tor_info.size
+                        if size > limit * 1024**3:
+                            self.client.torrents_pause(torrent_hashes=self.ext_hash)
+                            time.sleep(0.3)
+                            self.listener.onDownloadError(f"{mssg}.\nYour File/Folder size is {get_readable_file_size(size)}")
+                            self.client.torrents_delete(torrent_hashes=self.ext_hash)
+                            self.client.auth_log_out()
+                            self.updater.cancel()     
+                    self.sizechecked = True
             elif tor_info.state == "stalledDL":
                 if time.time() - self.stalled_time >= 999999999: # timeout after downloading metadata
                     self.client.torrents_pause(torrent_hashes=self.ext_hash)
@@ -189,11 +216,11 @@ class QbitTorrent:
                 self.client.torrents_pause(torrent_hashes=self.ext_hash)
                 if self.qbitsel:
                     for dirpath, subdir, files in os.walk(f"{self.dire}", topdown=False):
-                        for file in files:
-                            if fnmatch(file, "*.!qB"):
-                                os.remove(os.path.join(dirpath, file))
+                        for filee in files:
+                            if filee.endswith(".!qB"):
+                                os.remove(os.path.join(dirpath, filee))
                         for folder in subdir:
-                            if fnmatch(folder, ".unwanted"):
+                            if folder == ".unwanted":
                                 shutil.rmtree(os.path.join(dirpath, folder))
                     for dirpath, subdir, files in os.walk(f"{self.dire}", topdown=False):
                         if not os.listdir(dirpath):
