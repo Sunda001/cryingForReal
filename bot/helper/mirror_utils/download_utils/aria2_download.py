@@ -25,7 +25,7 @@ class AriaDownloadHelper:
                 if dl.getListener().isTar:
                     sname = sname + ".zip" if dl.getListener().isZip else sname + ".tar"
                 if not dl.getListener().extract:
-            if dl is not None:
+                if dl is not None:
                 limit = None
                 if TAR_UNZIP_LIMIT is not None and (dl.getListener().isTar or dl.getListener().extract):
                     mssg = f'Tar/Unzip limit is {TAR_UNZIP_LIMIT}GB'
