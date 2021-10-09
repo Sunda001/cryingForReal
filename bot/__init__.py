@@ -42,7 +42,7 @@ if CONFIG_FILE_URL is not None:
             f.write(res.content)
             f.close()
     else:
-        logging.error(res.status_code)
+        logging.error(f"Failed to download config.env {res.status_code}")
 
 load_dotenv('config.env')
 
@@ -208,7 +208,6 @@ try:
         STATUS_LIMIT = int(STATUS_LIMIT)
 except KeyError:
     STATUS_LIMIT = None
-
 try:
     MEGA_API_KEY = getConfig('MEGA_API_KEY')
 except KeyError:
@@ -242,24 +241,32 @@ try:
     TORRENT_DIRECT_LIMIT = getConfig('TORRENT_DIRECT_LIMIT')
     if len(TORRENT_DIRECT_LIMIT) == 0:
         TORRENT_DIRECT_LIMIT = None
+    else:
+        TORRENT_DIRECT_LIMIT = float(TORRENT_DIRECT_LIMIT)
 except KeyError:
     TORRENT_DIRECT_LIMIT = None
 try:
     CLONE_LIMIT = getConfig('CLONE_LIMIT')
     if len(CLONE_LIMIT) == 0:
         CLONE_LIMIT = None
+    else:
+        CLONE_LIMIT = float(CLONE_LIMIT)
 except KeyError:
     CLONE_LIMIT = None
 try:
     MEGA_LIMIT = getConfig('MEGA_LIMIT')
     if len(MEGA_LIMIT) == 0:
         MEGA_LIMIT = None
+    else:
+        MEGA_LIMIT = float(MEGA_LIMIT)
 except KeyError:
     MEGA_LIMIT = None
 try:
     TAR_UNZIP_LIMIT = getConfig('TAR_UNZIP_LIMIT')
     if len(TAR_UNZIP_LIMIT) == 0:
         TAR_UNZIP_LIMIT = None
+    else:
+        TAR_UNZIP_LIMIT = float(TAR_UNZIP_LIMIT)
 except KeyError:
     TAR_UNZIP_LIMIT = None
 try:
@@ -362,7 +369,7 @@ try:
                 f.write(res.content)
                 f.close()
         else:
-            logging.error(res.status_code)
+            logging.error(f"Failed to download token.pickle {res.status_code}")
             raise KeyError
 except KeyError:
     pass
@@ -377,7 +384,7 @@ try:
                 f.write(res.content)
                 f.close()
         else:
-            logging.error(res.status_code)
+            logging.error(f"Failed to download accounts.zip {res.status_code}")
             raise KeyError
         subprocess.run(["unzip", "-q", "-o", "accounts.zip"])
         os.remove("accounts.zip")
@@ -394,7 +401,7 @@ try:
                 f.write(res.content)
                 f.close()
         else:
-            logging.error(res.status_code)
+            logging.error(f"Failed to download drive_folder {res.status_code}")
             raise KeyError
 except KeyError:
     pass
@@ -416,6 +423,6 @@ if os.path.exists('drive_folder'):
             except IndexError as e:
                 INDEX_URLS.append(None)
 
-updater = tg.Updater(token=BOT_TOKEN)
+updater = tg.Updater(token=BOT_TOKEN, request_kwargs={'read_timeout': 30, 'connect_timeout': 10})
 bot = updater.bot
 dispatcher = updater.dispatcher

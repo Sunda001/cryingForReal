@@ -12,7 +12,6 @@ import shutil
 
 from telegram.ext import CommandHandler
 from telegram import InlineKeyboardMarkup
-from fnmatch import fnmatch
 
 from bot import Interval, INDEX_URL, BUTTON_FOUR_NAME, BUTTON_FOUR_URL, BUTTON_FIVE_NAME, BUTTON_FIVE_URL, \
                 BUTTON_SIX_NAME, BUTTON_SIX_URL, BLOCK_MEGA_FOLDER, BLOCK_MEGA_LINKS, VIEW_LINK, aria2, \
@@ -73,10 +72,10 @@ class MirrorListener(listeners.MirrorListeners):
         with download_dict_lock:
             LOGGER.info(f"Download completed: {download_dict[self.uid].name()}")
             download = download_dict[self.uid]
-            name = f"{download.name()}".replace('/', '')
+            name = str(download.name()).replace('/', '')
             gid = download.gid()
             size = download.size_raw()
-            if name == "None" or self.isQbit: # when pyrogram's media.file_name is of NoneType
+            if name == "None" or self.isQbit:
                 name = os.listdir(f'{DOWNLOAD_DIR}{self.uid}')[0]
             m_path = f'{DOWNLOAD_DIR}{self.uid}/{name}'
         if self.isTar:
@@ -88,9 +87,9 @@ class MirrorListener(listeners.MirrorListeners):
                     path = m_path + ".zip"
                     LOGGER.info(f'Zip: orig_path: {m_path}, zip_path: {path}')
                     if pswd is not None:
-                        subprocess.run(["7z", "a", f"-p{pswd}", path, m_path])
+                        subprocess.run(["7z", "a", "-mx=0", f"-p{pswd}", path, m_path])
                     else:
-                        subprocess.run(["7z", "a", path, m_path])
+                        subprocess.run(["7z", "a", "-mx=0", path, m_path])
                 else:
                     path = fs_utils.tar(m_path)
             except FileNotFoundError:
@@ -103,16 +102,19 @@ class MirrorListener(listeners.MirrorListeners):
                 os.remove(m_path)
         elif self.extract:
             try:
+                if os.path.isfile(m_path):
+                    path = fs_utils.get_base_name(m_path)
                 LOGGER.info(f"Extracting: {name}")
                 with download_dict_lock:
                     download_dict[self.uid] = ExtractStatus(name, m_path, size)
                 pswd = self.pswd
                 if os.path.isdir(m_path):
                     for dirpath, subdir, files in os.walk(m_path, topdown=False):
-                        for file in files:
-                            suffixes = (".part1.rar", ".part01.rar", ".part001.rar", ".part0001.rar")
-                            if (file.endswith(".rar") and "part" not in file) or file.endswith(suffixes):
-                                m_path = os.path.join(dirpath, file)
+                        for filee in files:
+                            if re.search(r'\.part0*1.rar$', filee) or re.search(r'\.7z.0*1$', filee) \
+                               or (filee.endswith(".rar") and not re.search(r'\.part\d+.rar$', filee)) \
+                               or re.search(r'\.zip.0*1$', filee):
+                                m_path = os.path.join(dirpath, filee)
                                 if pswd is not None:
                                     result = subprocess.run(["7z", "x", f"-p{pswd}", m_path, f"-o{dirpath}"])
                                 else:
@@ -120,13 +122,13 @@ class MirrorListener(listeners.MirrorListeners):
                                 if result.returncode != 0:
                                     LOGGER.warning('Unable to extract archive!')
                                 break
-                        for file in files:
-                            if file.endswith(".rar") or fnmatch(file, "*.r[0-9]") or fnmatch(file, "*.r[0-9]*"):
-                                del_path = os.path.join(dirpath, file)
+                        for filee in files:
+                            if filee.endswith(".rar") or re.search(r'\.r\d+$', filee) \
+                               or re.search(r'\.7z.\d+$', filee) or re.search(r'\.zip.\d+$', filee):
+                                del_path = os.path.join(dirpath, filee)
                                 os.remove(del_path)
                     path = f'{DOWNLOAD_DIR}{self.uid}/{name}'
                 else:
-                    path = fs_utils.get_base_name(m_path)
                     if pswd is not None:
                         result = subprocess.run(["pextract", m_path, pswd])
                     else:
@@ -150,8 +152,8 @@ class MirrorListener(listeners.MirrorListeners):
         if self.isLeech:
             checked = False
             for dirpath, subdir, files in os.walk(f'{DOWNLOAD_DIR}{self.uid}', topdown=False):
-                for file in files:
-                    f_path = os.path.join(dirpath, file)
+                for filee in files:
+                    f_path = os.path.join(dirpath, filee)
                     f_size = os.path.getsize(f_path)
                     if int(f_size) > TG_SPLIT_SIZE:
                         if not checked:
@@ -159,7 +161,7 @@ class MirrorListener(listeners.MirrorListeners):
                             with download_dict_lock:
                                 download_dict[self.uid] = SplitStatus(up_name, up_path, size)
                             LOGGER.info(f"Splitting: {up_name}")
-                        fs_utils.split(f_path, f_size, file, dirpath, TG_SPLIT_SIZE)
+                        fs_utils.split(f_path, f_size, filee, dirpath, TG_SPLIT_SIZE)
                         os.remove(f_path)
             LOGGER.info(f"Leech Name: {up_name}")
             tg = pyrogramEngine.TgUploader(up_name, self)
@@ -207,14 +209,18 @@ class MirrorListener(listeners.MirrorListeners):
                 uname = f'<a href="tg://user?id={self.message.from_user.id}">{self.message.from_user.first_name}</a>'
             count = len(files)
             if self.message.chat.type == 'private':
-                msg = f'<b>Name:</b> <code>{link}</code>\n'
-                msg += f'<b>Total Files:</b> {count}'
+                msg = f'<b>Name: </b><code>{link}</code>\n'
+                msg += f'<b>Total Files: </b>{count}'
+                if typ != 0:
+                    msg += f'\n<b>Corrupted Files: </b>{typ}'
                 sendMessage(msg, self.bot, self.update)
             else:
                 chat_id = str(self.message.chat.id)[4:]
-                msg = f"<b>🗂️ Name:</b> <a href='https://t.me/c/{chat_id}/{self.uid}'>{link}</a>\n\n"
-                msg += f'<b>🗄️ Total Files:</b> {count}\n\n'
-                msg += f'<b>👨🏻‍💻 Uploader:</b> {uname}\n\n\n'
+                msg = f"<b>🗂️ Name: </b><a href='https://t.me/c/{chat_id}/{self.uid}'>{link}</a>\n\n"
+                msg += f'<b>🗄️ Total Files: </b>{count}\n\n'
+                if typ != 0:
+                    msg += f'<b>🧰 Corrupted Files: </b>{typ}\n'
+                msg += f'<b>👨🏻‍💻 Uploader: </b>{uname}\n\n\n'
                 fmsg = ''
                 for index, item in enumerate(list(files), start=1):
                     msg_id = files[item]
@@ -238,13 +244,13 @@ class MirrorListener(listeners.MirrorListeners):
                 update_all_messages()
             return
         with download_dict_lock:
-            msg = f'<b>Filename: </b><code>{download_dict[self.uid].name()}</code>\n<b>Size: </b><code>{size}</code>'
+            msg = f'<b>Name: </b><code>{download_dict[self.uid].name()}</code>\n\n<b>Size: </b>{size}'
             if os.path.isdir(f'{DOWNLOAD_DIR}/{self.uid}/{download_dict[self.uid].name()}'):
-                msg += '\n<b>Type: </b><code>Folder</code>'
-                msg += f'\n<b>SubFolders: </b><code>{folders}</code>'
-                msg += f'\n<b>Files: </b><code>{files}</code>'
+                msg += '\n\n<b>Type: </b>Folder'
+                msg += f'\n<b>SubFolders: </b>{folders}'
+                msg += f'\n<b>Files: </b>{files}'
             else:
-                msg += f'\n<b>Type: </b><code>{typ}</code>'
+                msg += f'\n\n<b>Type: </b>{typ}'
             buttons = button_build.ButtonMaker()
             if SHORTENER is not None and SHORTENER_API is not None:
                 surl = short_url(link)
@@ -285,7 +291,7 @@ class MirrorListener(listeners.MirrorListeners):
             else:
                 uname = f'<a href="tg://user?id={self.message.from_user.id}">{self.message.from_user.first_name}</a>'
             if uname is not None:
-                msg += f'\n\ncc: {uname}'
+                msg += f'\n\n<b>cc: </b>{uname}'
             try:
                 fs_utils.clean_download(download_dict[self.uid].path())
             except FileNotFoundError:
@@ -418,17 +424,17 @@ def _mirror(bot, update, isTar=False, extract=False, isZip=False, isQbit=False, 
         if not isTar and not extract and not isLeech:
             sendMessage(f"Use /{BotCommands.CloneCommand} to clone Google Drive file/folder\nUse /{BotCommands.TarMirrorCommand} to make tar of Google Drive folder\nUse /{BotCommands.UnzipMirrorCommand} to extracts archive Google Drive file", bot, update)
             return
-        res, size, name, files = gdriveTools.GoogleDriveHelper().clonehelper(link)
+        res, size, name, files = gdriveTools.GoogleDriveHelper().helper(link)
         if res != "":
             sendMessage(res, bot, update)
             return
         if TAR_UNZIP_LIMIT is not None:
-            result = bot_utils.check_limit(size, TAR_UNZIP_LIMIT)
-            if result:
-                msg = f'Failed, Tar/Unzip limit is {TAR_UNZIP_LIMIT}.\nYour File/Folder size is {get_readable_file_size(size)}.'
+            LOGGER.info('Checking File/Folder Size...')
+            if size > TAR_UNZIP_LIMIT * 1024**3:
+                msg = f'Failed, Tar/Unzip limit is {TAR_UNZIP_LIMIT}GB.\nYour File/Folder size is {get_readable_file_size(size)}.'
                 sendMessage(msg, bot, update)
                 return
-        LOGGER.info(f"Download Name : {name}")
+        LOGGER.info(f"Download Name: {name}")
         drive = gdriveTools.GoogleDriveHelper(name, listener)
         gid = ''.join(random.SystemRandom().choices(string.ascii_letters + string.digits, k=12))
         download_status = DownloadStatus(drive, size, listener, gid)
