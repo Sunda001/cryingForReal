@@ -3,7 +3,7 @@ import threading
 from mega import (MegaApi, MegaListener, MegaRequest, MegaTransfer, MegaError)
 from bot.helper.telegram_helper.message_utils import *
 import os
-from bot.helper.ext_utils.bot_utils import new_thread, get_mega_link_type, get_readable_file_size, check_limit
+from bot.helper.ext_utils.bot_utils import new_thread, get_mega_link_type, get_readable_file_size
 from bot.helper.mirror_utils.status_utils.mega_download_status import MegaDownloadStatus
 
 from bot import MEGA_LIMIT, STOP_DUPLICATE, TAR_UNZIP_LIMIT
@@ -172,20 +172,19 @@ class MegaDownloadHelper:
             mname = node.getName()
             if listener.isTar:
                 mname = mname + ".zip" if listener.isZip else mname + ".tar"
-            if listener.extract:
-                smsg = None
-            else:
-                return
-        if MEGA_LIMIT is not None or TAR_UNZIP_LIMIT is not None:
+            if not listener.extract:
+                    return
+        limit = None
+        if TAR_UNZIP_LIMIT is not None and (listener.isTar or listener.extract):
+            msg3 = f'Failed, Tar/Unzip limit is {TAR_UNZIP_LIMIT}GB.\nYour File/Folder size is {get_readable_file_size(api.getSize(node))}.'
+            limit = TAR_UNZIP_LIMIT
+        elif MEGA_LIMIT is not None:
+            msg3 = f'Failed, Mega limit is {MEGA_LIMIT}GB.\nYour File/Folder size is {get_readable_file_size(api.getSize(node))}.' 
+            limit = MEGA_LIMIT
+        if limit is not None:
+            LOGGER.info('Checking File/Folder Size...')
             size = api.getSize(node)
-            if listener.isTar or listener.extract:
-                is_tar_ext = True
-                msg3 = f'Failed, Tar/Unzip limit is {TAR_UNZIP_LIMIT}.\nYour File/Folder size is {get_readable_file_size(api.getSize(node))}.'
-            else:
-                is_tar_ext = False
-                msg3 = f'Failed, Mega limit is {MEGA_LIMIT}.\nYour File/Folder size is {get_readable_file_size(api.getSize(node))}.'
-            result = check_limit(size, MEGA_LIMIT, TAR_UNZIP_LIMIT, is_tar_ext)
-            if result:
+            if size > limit * 1024**3:
                 sendMessage(msg3, listener.bot, listener.update)
                 executor.continue_event.set()
                 return
