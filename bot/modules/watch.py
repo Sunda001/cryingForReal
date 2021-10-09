@@ -60,7 +60,6 @@ def leechWatchZip(update, context):
 
 leech_watch_handler = CommandHandler(BotCommands.LeechWatchCommand, leechWatch,
                                 filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
-                                    filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
 leech_zip_watch_handler = CommandHandler(BotCommands.LeechZipWatchCommand, leechWatchZip,
                                     filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
 
