@@ -6,10 +6,10 @@ import magic
 import tarfile
 import subprocess
 import time
+import math
+import json
 
 from PIL import Image
-from hachoir.parser import createParser
-from hachoir.metadata import extractMetadata
 
 from .exceptions import NotSupportedExtractionArchive
 from bot import aria2, LOGGER, DOWNLOAD_DIR, get_client, TG_SPLIT_SIZE
@@ -55,6 +55,7 @@ def get_path_size(path):
             total_size += os.path.getsize(abs_path)
     return total_size
 
+"""
 def tar(org_path):
     tar_path = org_path + ".tar"
     path = pathlib.PurePath(org_path)
@@ -63,6 +64,7 @@ def tar(org_path):
     tar.add(org_path, arcname=path.name)
     tar.close()
     return tar_path
+"""
 
 def get_base_name(orig_path: str):
     if orig_path.endswith(".tar.bz2"):
@@ -153,9 +155,10 @@ def take_ss(video_file):
     if not os.path.exists(des_dir):
         os.mkdir(des_dir)
     des_dir = os.path.join(des_dir, f"{time.time()}.jpg")
-    metadata = extractMetadata(createParser(video_file))
-    duration = metadata.get('duration').seconds if metadata.has("duration") else 5
-    duration = int(duration) / 2
+    duration = get_media_info(video_file)[0]
+    if duration == 0:
+        duration = 3
+    duration = duration // 2
     subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-ss", str(duration),
                     "-i", video_file, "-vframes", "1", des_dir])
     if not os.path.lexists(des_dir):
@@ -167,12 +170,12 @@ def take_ss(video_file):
     img.save(des_dir, "JPEG")
     return des_dir
 
-def split(path, size, file, dirpath, split_size, start_time=0, i=1):
-    if file.upper().endswith(VIDEO_SUFFIXES):
-        base_name, extension = os.path.splitext(file)
-        metadata = extractMetadata(createParser(path))
-        total_duration = metadata.get('duration').seconds - 8
-        split_size = split_size - 3000000
+def split(path, size, filee, dirpath, split_size, start_time=0, i=1):
+    if filee.upper().endswith(VIDEO_SUFFIXES):
+        base_name, extension = os.path.splitext(filee)
+        total_duration = get_media_info(path)[0] - 7
+        split_size = split_size - 2500000
+        parts = math.ceil(size/TG_SPLIT_SIZE)
         while start_time < total_duration:
             parted_name = "{}.part{}{}".format(str(base_name), str(i).zfill(3), str(extension))
             out_path = os.path.join(dirpath, parted_name)
@@ -182,12 +185,33 @@ def split(path, size, file, dirpath, split_size, start_time=0, i=1):
             out_size = get_path_size(out_path)
             if out_size > TG_SPLIT_SIZE:
                 dif = out_size - TG_SPLIT_SIZE
-                split_size = split_size - dif + 2000000
+                split_size = split_size - dif + 2400000
                 os.remove(out_path)
-                return split(path, size, file, dirpath, split_size, start_time, i)
-            metadata = extractMetadata(createParser(out_path))
-            start_time = start_time + metadata.get('duration').seconds - 5
+                return split(path, size, filee, dirpath, split_size, start_time, i)
+            lpd = get_media_info(out_path)[0]
+            start_time = start_time + lpd - 5
+            if i > parts:
+                LOGGER.warning("Maybe something went Wrong while splitting, check last part of each splited video")
+                break
             i = i + 1
     else:
-        out_path = os.path.join(dirpath, file + ".")
+        out_path = os.path.join(dirpath, filee + ".")
         subprocess.run(["split", "--numeric-suffixes=1", "--suffix-length=3", f"--bytes={split_size}", path, out_path])
+
+def get_media_info(path):
+    result = subprocess.check_output(["ffprobe", "-hide_banner", "-loglevel", "error", "-print_format", 
+                                      "json", "-show_format", path]).decode('utf-8')
+    fields = json.loads(result)['format']
+    try:
+        duration = round(float(fields['duration']))
+    except:
+        duration = 0
+    try:
+        artist = str(fields['tags']['artist'])
+    except:
+        artist = None
+    try:
+        title = str(fields['tags']['title'])
+    except:
+        title = None
+    return duration, artist, title
