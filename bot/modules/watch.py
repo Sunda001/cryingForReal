@@ -9,7 +9,7 @@ from bot.helper.telegram_helper.filters import CustomFilters
 import threading
 
 
-def _watch(bot: Bot, update, isZip=False, isZip=False, isLeech=False):
+def _watch(bot: Bot, update, isZip=False, isLeech=False):
     mssg = update.message.text
     message_args = mssg.split(' ')
     name_args = mssg.split('|')
