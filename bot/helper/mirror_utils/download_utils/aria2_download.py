@@ -25,6 +25,7 @@ class AriaDownloadHelper:
                 if dl.getListener().isZip:
                     sname = sname + ".zip"
                 if not dl.getListener().extract:
+                         return
             if dl is not None:
                 limit = None
                 if ZIP_UNZIP_LIMIT is not None and (dl.getListener().isZip or dl.getListener().extract):
