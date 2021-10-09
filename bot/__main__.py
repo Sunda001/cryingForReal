@@ -68,8 +68,6 @@ def log(update, context):
 
 help_string_telegraph = f'''<br>
 <br><br>
-<b>/{BotCommands.LeechTarWatchCommand}</b> Leech through youtube-dl and tar before uploading 
-<br><br>
 <b>/{BotCommands.LeechZipWatchCommand}</b> Leech through youtube-dl and zip before uploading 
 <br><br>
 <b>/{BotCommands.LeechSetCommand}</b> Leech Settings 
@@ -93,9 +91,6 @@ help_string = f'''
 /{BotCommands.LeechCommand}: Leech Torrent/Direct link
 
 
-/{BotCommands.TarLeechCommand}: Leech Torrent/Direct link and upload as .tar
-
-
 /{BotCommands.ZipLeechCommand}: Leech Torrent/Direct link and upload as .zip
 
 
@@ -104,8 +99,6 @@ help_string = f'''
 
 /{BotCommands.QbLeechCommand}: Leech  Torrent/Magnet using qBittorrent
 
-
-/{BotCommands.QbTarLeechCommand}: Leech Torrent/Magnet and upload as .tar using qb
 
 
 /{BotCommands.QbZipLeechCommand}: Leech Torrent/Magnet and upload as .zip using qb
