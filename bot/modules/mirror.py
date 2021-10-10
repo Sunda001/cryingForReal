@@ -352,10 +352,11 @@ def _mirror(bot, update, isZip=False, extract=False, isQbit=False, isLeech=False
     if ussr != '' and pssw != '':
         link = link.split("://", maxsplit=1)
         link = f'{link[0]}://{ussr}:{pssw}@{link[1]}'
-    pswd = re.search('(?<=pswd: )(.*)', update.message.text)
-    if pswd is not None:
-      pswd = pswd.groups()
-      pswd = " ".join(pswd)
+    pswd = mesg[0].split('pswd: ')
+    if len(pswd) > 1:
+        pswd = pswd[1]
+    else:
+        pswd = None
     link = re.split(r"pswd:|\|", link)[0]
     reply_to = update.message.reply_to_message
     if reply_to is not None:
