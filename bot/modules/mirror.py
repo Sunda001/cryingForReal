@@ -324,7 +324,7 @@ class MirrorListener(listeners.MirrorListeners):
 def _mirror(bot, update, isZip=False, extract=False, isQbit=False, isLeech=False):
     mesg = update.message.text.split('\n')
     message_args = mesg[0].split(' ', maxsplit=1)
-    name_args = mesg[0].split('|')
+    name_args = mesg[0].split('|', maxsplit=2)
     qbitsel = False
     try:
         link = message_args[1]
@@ -339,7 +339,7 @@ def _mirror(bot, update, isZip=False, extract=False, isQbit=False, isLeech=False
     try:
         name = name_args[1]
         name = name.strip()
-        if name.startswith("pswd: "):
+        if "pswd:" in name_args[0]:
             name = ''
     except IndexError:
         name = ''
