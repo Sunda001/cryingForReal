@@ -19,7 +19,9 @@ from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_tim
 from .helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper import button_build
 from .modules import authorize, mirror_status, mirror, watch, shell, eval, speedtest, leech_settings, cancel_mirror
+from datetime import date
 
+today = date.today()
 
 def stats(update, context):
     currentTime = get_readable_time(time.time() - botStartTime)
@@ -32,8 +34,10 @@ def stats(update, context):
     cpuUsage = psutil.cpu_percent(interval=0.5)
     memory = psutil.virtual_memory().percent
     disk = psutil.disk_usage('/').percent
+    d1 = today.strftime("%d/%m/%Y")
     stats = f'<b>Bot Uptime:</b> <code>{currentTime}</code>\n' \
             f'<b>Total Disk Space:</b> <code>{total}</code>\n' \
+            f'<b>Date:</b> <code>{d1}</code>\n' \
             f'<b>Used:</b> <code>{used}</code> ' \
             f'<b>Free:</b> <code>{free}</code>\n\n' \
             f'<b>Upload:</b> <code>{sent}</code>\n' \
@@ -78,8 +82,6 @@ help_string_telegraph = f'''<br>
 <br><br>
 <b>/{BotCommands.SetThumbCommand}</b> Reply to photo to set it as thumbnail for next uploads 
 <br><br>
-<b>/{BotCommands.CancelMirror}</b>: Reply to the message by which the download was initiated and that download will be cancelled
-<br><br>
 <b>/{BotCommands.CancelAllCommand}</b>: Cancel all running tasks [OWNER-ONLY]
 <br><br>
 <b>/{BotCommands.StatusCommand}</b>: Shows a status of all the downloads
@@ -104,7 +106,6 @@ help_string = f'''
 /{BotCommands.QbLeechCommand}: Leech  Torrent/Magnet using qBittorrent
 
 
-
 /{BotCommands.QbZipLeechCommand}: Leech Torrent/Magnet and upload as .zip using qb
 
 
@@ -112,6 +113,9 @@ help_string = f'''
 
 
 /{BotCommands.LeechWatchCommand}: Leech through Youtube-dl supported link and Upload to Telegram
+
+
+{BotCommands.CancelMirror}: Reply to the message by which the download was initiated and that download will be cancelled
 '''
 
 def bot_help(update, context):
