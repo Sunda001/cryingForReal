@@ -78,8 +78,6 @@ help_string_telegraph = f'''<br>
 <br><br>
 <b>/{BotCommands.SetThumbCommand}</b> Reply to photo to set it as thumbnail for next uploads 
 <br><br>
-<b>/{BotCommands.CancelMirror}</b>: Reply to the message by which the download was initiated and that download will be cancelled
-<br><br>
 <b>/{BotCommands.CancelAllCommand}</b>: Cancel all running tasks [OWNER-ONLY]
 <br><br>
 <b>/{BotCommands.StatusCommand}</b>: Shows a status of all the downloads
@@ -104,7 +102,6 @@ help_string = f'''
 /{BotCommands.QbLeechCommand}: Leech  Torrent/Magnet using qBittorrent
 
 
-
 /{BotCommands.QbZipLeechCommand}: Leech Torrent/Magnet and upload as .zip using qb
 
 
@@ -112,6 +109,9 @@ help_string = f'''
 
 
 /{BotCommands.LeechWatchCommand}: Leech through Youtube-dl supported link and Upload to Telegram
+
+
+{BotCommands.CancelMirror}: Reply to the message by which the download was initiated and that download will be cancelled
 '''
 
 def bot_help(update, context):
