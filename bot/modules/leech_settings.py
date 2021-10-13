@@ -1,6 +1,4 @@
 # Implement By - @anasty17 (https://github.com/SlamDevs/slam-mirrorbot/commit/d888a1e7237f4633c066f7c2bbfba030b83ad616)
-# (c) https://github.com/SlamDevs/slam-mirrorbot
-# All rights reserved
 
 import os
 import threading
@@ -19,7 +17,7 @@ from bot.helper.telegram_helper import button_build
 def leechSet(update, context):
     user_id = update.message.from_user.id
     path = f"Thumbnails/{user_id}.jpg"
-    msg = f"Leech Type for {user_id} user is "
+    msg = f"Leech Type for <a href='tg://user?id={user_id}'>{update.message.from_user.full_name}</a> is "
     if (
         user_id in AS_DOC_USERS
         or user_id not in AS_MEDIA_USERS
@@ -79,7 +77,11 @@ def setLeechType(update, context):
         else:
             query.answer(text="No Thumbnail To Delete!", show_alert=True)
     elif data[0] == "closeset":
-        query.message.delete()
+        try:
+            query.message.delete()
+            query.message.reply_to_message.delete()
+        except:
+            pass
 
 def setThumb(update, context):
     user_id = update.message.from_user.id
@@ -95,7 +97,7 @@ def setThumb(update, context):
         img.thumbnail((480, 320))
         img.save(des_dir, "JPEG")
         os.remove(photo_dir)
-        sendMessage(f"Custom thumbnail saved for <code>{user_id}</code> user.", context.bot, update)
+        sendMessage(f"Custom thumbnail saved for <a href='tg://user?id={user_id}'>{update.message.from_user.full_name}</a> .", context.bot, update)
     else:
         sendMessage("Reply to a photo to save custom thumbnail.", context.bot, update)
 
