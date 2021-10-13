@@ -20,8 +20,8 @@ def _watch(bot: Bot, update, isZip=False, isLeech=False):
         msg = f"/{BotCommands.LeechWatchCommand} [youtube-dl supported link] [quality] |[CustomName] to mirror with youtube-dl.\n\n"
         msg += "<b>Note: Quality and custom name are optional</b>\n\nExample of quality: audio, 144, 240, 360, 480, 720, 1080, 2160."
         msg += "\n\nIf you want to use custom filename, enter it after |"
-        msg += f"\n\nExample:\n`/{BotCommands.LeechWatchCommand} https://youtu.be/a4pi2zKbf8Q 720 |testvideo.mp4`\n\n"
-        msg += "This file will be downloaded in 720p quality and it's name will be <b>testvideo.mp4</b>"
+        msg += f"\n\nExample:\n<code>/{BotCommands.LeechWatchCommand} https://youtu.be/a4pi2zKbf8Q 720 |Shiv</code>\n\n"
+        msg += "This file will be downloaded in 720p quality and it's name will be <b>Shiv</b>"
         sendMessage(msg, bot, update)
         return
     
