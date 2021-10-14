@@ -10,8 +10,6 @@ import string
 import time
 import shutil
 
-from datetime import datetime
-
 from telegram.ext import CommandHandler
 from telegram import InlineKeyboardMarkup
 
@@ -42,9 +40,6 @@ from bot.helper.telegram_helper import button_build
 
 ariaDlManager = AriaDownloadHelper()
 ariaDlManager.start_listener()
-
-start_time = datetime.now()
-time_elapsed = datetime.now() - start_time
 
 class MirrorListener(listeners.MirrorListeners):
     def __init__(self, bot, update, pswd, isZip=False, extract=False, isQbit=False, isLeech=False):
@@ -229,12 +224,10 @@ class MirrorListener(listeners.MirrorListeners):
                     if len(fmsg.encode('utf-8') + msg.encode('utf-8')) > 4000:
                         time.sleep(1.5)
                         sendMessage(msg + fmsg, self.bot, self.update)
-                        sendMessage('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed)
                         fmsg = ''
                 if fmsg != '':
                     time.sleep(1.5)
                     sendMessage(msg + fmsg, self.bot, self.update)
-                    sendMessage('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed)
             with download_dict_lock:
                 try:
                     fs_utils.clean_download(download_dict[self.uid].path())
