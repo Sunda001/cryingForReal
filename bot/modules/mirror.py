@@ -211,7 +211,7 @@ class MirrorListener(listeners.MirrorListeners):
             if self.message.chat.type == 'private':
                 msg = f'<b>🗂️ Name: </b><code>{link}</code>\n'
                 msg += f'<b>🗄️ Total Files: </b>{count}'
-                msg += f'<b>Time Taken: </b>(hh:mm:ss.ms) {}.format(time_elapsed)\n`
+                msg += Time Taken (hh:mm:ss.ms){}.format(time_elapsed)\n`
                 if typ != 0:
                     msg += f'\n<b>Corrupted Files: </b>{typ}'
                 sendMessage(msg, self.bot, self.update)
@@ -219,7 +219,7 @@ class MirrorListener(listeners.MirrorListeners):
                 chat_id = str(self.message.chat.id)[4:]
                 msg = f"<b>Name: </b><a href='https://t.me/c/{chat_id}/{self.uid}'>{link}</a>\n"
                 msg += f'<b>Total Files: </b>{count}\n'
-                msg += f'<b>Time Taken: </b>(hh:mm:ss.ms) {}.format(time_elapsed)\n`
+                msg += Time Taken (hh:mm:ss.ms){}.format(time_elapsed)\n`
                 if typ != 0:
                     msg += f'<b>🗳️ Corrupted Files: </b>{typ}\n'
                 msg += f'<b>👨🏻‍💻 Uploader: </b>{uname}\n\n'
