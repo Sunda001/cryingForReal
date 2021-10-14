@@ -115,7 +115,7 @@ help_string = f'''
 /{BotCommands.LeechWatchCommand}: Leech through Youtube-dl supported link and Upload to Telegram
 
 
-{BotCommands.CancelMirror}: Reply to the message by which the download was initiated and that download will be cancelled
+/{BotCommands.CancelMirror}: Reply to the message by which the download was initiated and that download will be cancelled
 '''
 
 def bot_help(update, context):
