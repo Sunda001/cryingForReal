@@ -210,8 +210,7 @@ class MirrorListener(listeners.MirrorListeners):
             count = len(files)
             if self.message.chat.type == 'private':
                 msg = f'<b>🗂️ Name: </b><code>{link}</code>\n'
-                msg += f'<b>🗄️ Total Files: </b>{count}'
-                msg += Time Taken {}.format(time_elapsed)\n
+                msg += f'<b>🗄️ Total Files: </b>{count}'\n
                 if typ != 0:
                     msg += f'\n<b>Corrupted Files: </b>{typ}'
                 sendMessage(msg, self.bot, self.update)
@@ -219,7 +218,6 @@ class MirrorListener(listeners.MirrorListeners):
                 chat_id = str(self.message.chat.id)[4:]
                 msg = f"<b>Name: </b><a href='https://t.me/c/{chat_id}/{self.uid}'>{link}</a>\n"
                 msg += f'<b>Total Files: </b>{count}\n'
-                msg += Time Taken {}.format(time_elapsed)\n
                 if typ != 0:
                     msg += f'<b>🗳️ Corrupted Files: </b>{typ}\n'
                 msg += f'<b>👨🏻‍💻 Uploader: </b>{uname}\n\n'
@@ -231,10 +229,12 @@ class MirrorListener(listeners.MirrorListeners):
                     if len(fmsg.encode('utf-8') + msg.encode('utf-8')) > 4000:
                         time.sleep(1.5)
                         sendMessage(msg + fmsg, self.bot, self.update)
+                        sendMessage('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed)
                         fmsg = ''
                 if fmsg != '':
                     time.sleep(1.5)
                     sendMessage(msg + fmsg, self.bot, self.update)
+                    sendMessage('Time elapsed (hh:mm:ss.ms) {}'.format(time_elapsed)
             with download_dict_lock:
                 try:
                     fs_utils.clean_download(download_dict[self.uid].path())
