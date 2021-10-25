@@ -25,6 +25,7 @@ today = date.today()
 
 def stats(update, context):
     currentTime = get_readable_time(time.time() - botStartTime)
+    d1 = today.strftime("%d/%m/%Y")
     total, used, free = shutil.disk_usage('.')
     total = get_readable_file_size(total)
     used = get_readable_file_size(used)
@@ -32,19 +33,33 @@ def stats(update, context):
     sent = get_readable_file_size(psutil.net_io_counters().bytes_sent)
     recv = get_readable_file_size(psutil.net_io_counters().bytes_recv)
     cpuUsage = psutil.cpu_percent(interval=0.5)
-    memory = psutil.virtual_memory().percent
     disk = psutil.disk_usage('/').percent
-    d1 = today.strftime("%d/%m/%Y")
-    stats = f'<b>Bot Uptime:</b> <code>{currentTime}</code>\n' \
-            f'<b>Total Disk Space:</b> <code>{total}</code>\n' \
+    p_core = psutil.cpu_count(logical=False)
+    t_core = psutil.cpu_count(logical=True)
+    swap = psutil.swap_memory()
+    swap_p = swap.percent
+    swap_t = get_readable_file_size(swap.total)
+    swap_u = get_readable_file_size(swap.used)
+    memory = psutil.virtual_memory()
+    mem_p = memory.percent
+    mem_t = get_readable_file_size(memory.total)
+    mem_a = get_readable_file_size(memory.available)
+    mem_u = get_readable_file_size(memory.used)
+    stats = f'<b>Bot Uptime:</b> {currentTime}\n\n'\
             f'<b>Date:</b> <code>{d1}</code>\n' \
-            f'<b>Used:</b> <code>{used}</code> ' \
-            f'<b>Free:</b> <code>{free}</code>\n\n' \
-            f'<b>Upload:</b> <code>{sent}</code>\n' \
-            f'<b>Download:</b> <code>{recv}</code>\n\n' \
-            f'<b>CPU:</b> <code>{cpuUsage}%</code> ' \
-            f'<b>RAM:</b> <code>{memory}%</code> ' \
-            f'<b>DISK:</b> <code>{disk}%</code>'
+            f'<b>Total Disk Space:</b> {total}\n'\
+            f'<b>Used:</b> {used} | <b>Free:</b> {free}\n\n'\
+            f'<b>Upload:</b> {sent}\n'\
+            f'<b>Download:</b> {recv}\n\n'\
+            f'<b>CPU:</b> {cpuUsage}%\n'\
+            f'<b>RAM:</b> {mem_p}%\n'\
+            f'<b>DISK:</b> {disk}%\n\n'\
+            f'<b>Physical cores:</b> {p_core}\n'\
+            f'<b>Total cores:</b> {t_core}\n\n'\
+            f'<b>SWAP:</b> {swap_t} - {swap_u} <b>Used</b> {swap_p}%\n'\
+            f'<b>Memory Total:</b> {mem_t}\n'\
+            f'<b>Memory Free:</b> {mem_a}\n'\
+            f'<b>Memory Used:</b> {mem_u}\n'
     sendMessage(stats, context.bot, update)
 
 
