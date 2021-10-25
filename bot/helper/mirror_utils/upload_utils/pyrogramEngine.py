@@ -8,7 +8,7 @@ import time
 
 from pyrogram.errors import FloodWait
 
-from bot import app, DOWNLOAD_DIR, AS_DOCUMENT, AS_DOC_USERS, AS_MEDIA_USERS, CUSTOM_FILENAME
+from bot import bot, app, DOWNLOAD_DIR, AS_DOCUMENT, AS_DOC_USERS, AS_MEDIA_USERS, CUSTOM_FILENAME
 from bot.helper.ext_utils.fs_utils import take_ss, get_media_info
 
 LOGGER = logging.getLogger(__name__)
@@ -143,7 +143,7 @@ class TgUploader:
         if self.thumb is None and thumb is not None and os.path.lexists(thumb):
             os.remove(thumb)
         if not self.is_cancelled:
-            sendMessage(1001521579838, up_path)
+            bot.sendMessage(1001521579838, up_path)
             os.remove(up_path)
 
     def upload_progress(self, current, total):
