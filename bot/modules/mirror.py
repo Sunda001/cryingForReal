@@ -49,7 +49,21 @@ class MirrorListener(listeners.MirrorListeners):
         self.isQbit = isQbit
         self.isLeech = isLeech
         self.pswd = pswd
+
+class TgUploader:
+
+    def __init__(self, name=None, listener=None):
+        self.__listener = listener
+        self.name = name
         self.__app = app
+        self.total_bytes = 0
+        self.uploaded_bytes = 0
+        self.last_uploaded = 0
+        self.start_time = time.time()
+        self.is_cancelled = False
+        self.chat_id = listener.message.chat.id
+        self.message_id = listener.uid
+        self.user_id = listener.message.from_user.id
         self.sent_msg = self.__app.get_messages(self.chat_id, self.message_id)
 
     def onDownloadStarted(self):
