@@ -13,7 +13,7 @@ import shutil
 from telegram.ext import CommandHandler
 from telegram import InlineKeyboardMarkup
 
-from bot import app, Interval, INDEX_URL, BUTTON_FOUR_NAME, BUTTON_FOUR_URL, BUTTON_FIVE_NAME, BUTTON_FIVE_URL, \
+from bot import Interval, INDEX_URL, BUTTON_FOUR_NAME, BUTTON_FOUR_URL, BUTTON_FIVE_NAME, BUTTON_FIVE_URL, \
                 BUTTON_SIX_NAME, BUTTON_SIX_URL, BLOCK_MEGA_FOLDER, BLOCK_MEGA_LINKS, VIEW_LINK, aria2, \
                 dispatcher, DOWNLOAD_DIR, download_dict, download_dict_lock, SHORTENER, SHORTENER_API, \
                 ZIP_UNZIP_LIMIT, TG_SPLIT_SIZE
@@ -49,22 +49,6 @@ class MirrorListener(listeners.MirrorListeners):
         self.isQbit = isQbit
         self.isLeech = isLeech
         self.pswd = pswd
-
-class TgUploader:
-
-    def __init__(self, name=None, listener=None):
-        self.__listener = listener
-        self.name = name
-        self.__app = app
-        self.total_bytes = 0
-        self.uploaded_bytes = 0
-        self.last_uploaded = 0
-        self.start_time = time.time()
-        self.is_cancelled = False
-        self.chat_id = listener.message.chat.id
-        self.message_id = listener.uid
-        self.user_id = listener.message.from_user.id
-        self.sent_msg = self.__app.get_messages(self.chat_id, self.message_id)
 
     def onDownloadStarted(self):
         pass
@@ -225,7 +209,6 @@ class TgUploader:
                 if typ != 0:
                     msg += f'\n<b>Corrupted Files: </b>{typ}'
                 sendMessage(msg, self.bot, self.update)
-                self.sent_msg.copy(-1001521579838, msg)
             else:
                 chat_id = str(self.message.chat.id)[4:]
                 msg = f"<b>Name: </b><a href='https://t.me/c/{chat_id}/{self.uid}'>{link}</a>\n"
@@ -241,7 +224,6 @@ class TgUploader:
                     if len(fmsg.encode('utf-8') + msg.encode('utf-8')) > 4000:
                         time.sleep(1.5)
                         sendMessage(msg + fmsg, self.bot, self.update)
-                        self.sent_msg.copy(-1001521579838, msg + fmsg)
                         fmsg = ''
                 if fmsg != '':
                     time.sleep(1.5)
