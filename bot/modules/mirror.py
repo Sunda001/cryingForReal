@@ -49,6 +49,8 @@ class MirrorListener(listeners.MirrorListeners):
         self.isQbit = isQbit
         self.isLeech = isLeech
         self.pswd = pswd
+        self.__app = app
+        self.sent_msg = self.__app.get_messages(self.chat_id, self.message_id)
 
     def onDownloadStarted(self):
         pass
