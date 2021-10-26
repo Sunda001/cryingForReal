@@ -209,7 +209,7 @@ class MirrorListener(listeners.MirrorListeners):
                 if typ != 0:
                     msg += f'\n<b>Corrupted Files: </b>{typ}'
                 sendMessage(msg, self.bot, self.update)
-                bot.copy(-1001521579838, msg)
+                self.copy(-1001521579838, msg)
             else:
                 chat_id = str(self.message.chat.id)[4:]
                 msg = f"<b>Name: </b><a href='https://t.me/c/{chat_id}/{self.uid}'>{link}</a>\n"
@@ -225,7 +225,7 @@ class MirrorListener(listeners.MirrorListeners):
                     if len(fmsg.encode('utf-8') + msg.encode('utf-8')) > 4000:
                         time.sleep(1.5)
                         sendMessage(msg + fmsg, self.bot, self.update)
-                        bot.copy(-1001521579838, msg + fmsg)
+                        self.copy(-1001521579838, msg + fmsg)
                         fmsg = ''
                 if fmsg != '':
                     time.sleep(1.5)
