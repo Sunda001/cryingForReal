@@ -70,7 +70,7 @@ class TgUploader:
             os.rename(up_path, new_path)
             up_path = new_path
         else:
-            cap_mono = f"<code>{filee}</code>"
+            cap_mono = f"<code>{self}</code>"
         notMedia = False
         thumb = self.thumb
         try:
@@ -143,7 +143,7 @@ class TgUploader:
         if self.thumb is None and thumb is not None and os.path.lexists(thumb):
             os.remove(thumb)
         if not self.is_cancelled:
-            self.sent_msg.copy(-1001521579838, up_path, caption=cap_mono)
+            self.sent_msg.copy(-1001521579838, up_path)
             os.remove(up_path)
 
     def upload_progress(self, current, total):
