@@ -143,7 +143,7 @@ class TgUploader:
         if self.thumb is None and thumb is not None and os.path.lexists(thumb):
             os.remove(thumb)
         if not self.is_cancelled:
-            os.path.basename.copy(-1001521579838, up_path)
+            self.sent_msg.copy(-1001521579838, up_path, caption=cap_mono)
             os.remove(up_path)
 
     def upload_progress(self, current, total):
