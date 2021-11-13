@@ -91,6 +91,8 @@ def direct_link_generator(link: str):
         return fichier(link)
     elif 'solidfiles.com' in link:
         return solidfiles(link)
+    elif 'krakenfiles.com' in link:
+        return krakenfiles(link)
     else:
         raise DirectDownloadLinkException(f'No Direct link function found for {link}')
 
@@ -205,7 +207,7 @@ def github(url: str) -> str:
 def hxfile(url: str) -> str:
     """ Hxfile direct link generator
     Based on https://github.com/zevtyardt/lk21
-             https://github.com/SlamDevs/slam-mirrorbot """
+    """
     bypasser = lk21.Bypass()
     return bypasser.bypass_filesIm(url)
 
@@ -213,7 +215,7 @@ def hxfile(url: str) -> str:
 def anonfiles(url: str) -> str:
     """ Anonfiles direct link generator
     Based on https://github.com/zevtyardt/lk21
-             https://github.com/SlamDevs/slam-mirrorbot """
+    """
     bypasser = lk21.Bypass()
     return bypasser.bypass_anonfiles(url)
 
@@ -221,7 +223,7 @@ def anonfiles(url: str) -> str:
 def letsupload(url: str) -> str:
     """ Letsupload direct link generator
     Based on https://github.com/zevtyardt/lk21
-             https://github.com/SlamDevs/slam-mirrorbot """
+    """
     dl_url = ''
     try:
         link = re.findall(r'\bhttps?://.*letsupload\.io\S+', url)[0]
@@ -235,7 +237,7 @@ def letsupload(url: str) -> str:
 def fembed(link: str) -> str:
     """ Fembed direct link generator
     Based on https://github.com/zevtyardt/lk21
-             https://github.com/SlamDevs/slam-mirrorbot """
+    """
     bypasser = lk21.Bypass()
     dl_url=bypasser.bypass_fembed(link)
     count = len(dl_url)
@@ -246,7 +248,7 @@ def fembed(link: str) -> str:
 def sbembed(link: str) -> str:
     """ Sbembed direct link generator
     Based on https://github.com/zevtyardt/lk21
-             https://github.com/SlamDevs/slam-mirrorbot """
+    """
     bypasser = lk21.Bypass()
     dl_url=bypasser.bypass_sbembed(link)
     count = len(dl_url)
@@ -285,7 +287,7 @@ def pixeldrain(url: str) -> str:
 def antfiles(url: str) -> str:
     """ Antfiles direct link generator
     Based on https://github.com/zevtyardt/lk21
-             https://github.com/SlamDevs/slam-mirrorbot """
+    """
     bypasser = lk21.Bypass()
     return bypasser.bypass_antfiles(url)
 
@@ -293,14 +295,14 @@ def antfiles(url: str) -> str:
 def streamtape(url: str) -> str:
     """ Streamtape direct link generator
     Based on https://github.com/zevtyardt/lk21
-             https://github.com/SlamDevs/slam-mirrorbot """
+    """
     bypasser = lk21.Bypass()
     return bypasser.bypass_streamtape(url)
 
 
 def racaty(url: str) -> str:
     """ Racaty direct links generator
-    based on https://github.com/SlamDevs/slam-mirrorbot """
+    based on https://github.com/SlamDevs/slam-mirrorbot"""
     dl_url = ''
     try:
         link = re.findall(r'\bhttps?://.*racaty\.net\S+', url)[0]
@@ -320,7 +322,7 @@ def racaty(url: str) -> str:
 def fichier(link: str) -> str:
     """ 1Fichier direct links generator
     Based on https://github.com/Maujar
-             https://github.com/SlamDevs/slam-mirrorbot """
+    """
     regex = r"^([http:\/\/|https:\/\/]+)?.*1fichier\.com\/\?.+"
     gan = re.match(regex, link)
     if not gan:
@@ -388,6 +390,45 @@ def solidfiles(url: str) -> str:
     mainOptions = str(re.search(r'viewerOptions\'\,\ (.*?)\)\;', pageSource).group(1))
     return json.loads(mainOptions)["downloadUrl"]
 
+
+def krakenfiles(page_link: str) -> str:
+    """ krakenfiles direct links generator
+    Based on https://github.com/tha23rd/py-kraken
+    By https://github.com/junedkh """
+    page_resp = requests.session().get(page_link)
+    soup = BeautifulSoup(page_resp.text, "lxml")
+    try:
+        token = soup.find("input", id="dl-token")["value"]
+    except:
+        raise DirectDownloadLinkException(f"Page link is wrong: {page_link}")
+
+    hashes = [
+        item["data-file-hash"]
+        for item in soup.find_all("div", attrs={"data-file-hash": True})
+    ]
+    if len(hashes) < 1:
+        raise DirectDownloadLinkException(
+            f"Hash not found for : {page_link}")
+
+    dl_hash = hashes[0]
+
+    payload = f'------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name="token"\r\n\r\n{token}\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--'
+    headers = {
+        "content-type": "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
+        "cache-control": "no-cache",
+        "hash": dl_hash,
+    }
+
+    dl_link_resp = requests.session().post(
+        f"https://krakenfiles.com/download/{hash}", data=payload, headers=headers)
+
+    dl_link_json = dl_link_resp.json()
+
+    if "url" in dl_link_json:
+        return dl_link_json["url"]
+    else:
+        raise DirectDownloadLinkException(
+            f"Failed to acquire download URL from kraken for : {page_link}")
 
 def useragent():
     """

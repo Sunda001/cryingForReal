@@ -17,7 +17,7 @@ from telegram import InlineKeyboardMarkup, ParseMode
 from bot import bot, Interval, INDEX_URL, BUTTON_FOUR_NAME, BUTTON_FOUR_URL, BUTTON_FIVE_NAME, BUTTON_FIVE_URL, \
                 BUTTON_SIX_NAME, BUTTON_SIX_URL, BLOCK_MEGA_FOLDER, BLOCK_MEGA_LINKS, VIEW_LINK, aria2, \
                 dispatcher, DOWNLOAD_DIR, download_dict, download_dict_lock, SHORTENER, SHORTENER_API, \
-                ZIP_UNZIP_LIMIT, TG_SPLIT_SIZE
+                ZIP_UNZIP_LIMIT, TG_SPLIT_SIZE, LOGGER
 from bot.helper.ext_utils import fs_utils, bot_utils
 from bot.helper.ext_utils.shortenurl import short_url
 from bot.helper.ext_utils.exceptions import DirectDownloadLinkException, NotSupportedExtractionArchive
@@ -36,7 +36,7 @@ from bot.helper.mirror_utils.status_utils.gdownload_status import DownloadStatus
 from bot.helper.mirror_utils.upload_utils import pyrogramEngine
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.filters import CustomFilters
-from bot.helper.telegram_helper.message_utils import *
+from bot.helper.telegram_helper.message_utils import sendMessage, sendMarkup, delete_all_messages, update_all_messages, sendStatusMessage
 from bot.helper.telegram_helper import button_build
 
 ariaDlManager = AriaDownloadHelper()
@@ -130,6 +130,7 @@ class MirrorListener(listeners.MirrorListeners):
                     else:
                         result = subprocess.run(["extract", m_path])
                     if result.returncode == 0:
+                        LOGGER.info(f"Extract Path: {path}")
                         os.remove(m_path)
                         LOGGER.info(f"Deleting archive: {m_path}")
                     else:
@@ -348,22 +349,13 @@ def _mirror(bot, update, isZip=False, extract=False, isQbit=False, isLeech=False
             name = ''
     except IndexError:
         name = ''
-    try:
-        ussr = urllib.parse.quote(mesg[1], safe='')
-        pssw = urllib.parse.quote(mesg[2], safe='')
-    except:
-        ussr = ''
-        pssw = ''
-    if ussr != '' and pssw != '':
-        link = link.split("://", maxsplit=1)
-        link = f'{link[0]}://{ussr}:{pssw}@{link[1]}'
+    link = re.split(r"pswd:|\|", link)[0]
+    link = link.strip()
     pswd = mesg[0].split('pswd: ')
     if len(pswd) > 1:
         pswd = pswd[1]
     else:
         pswd = None
-    link = re.split(r"pswd:|\|", link)[0]
-    link = link.strip()
     reply_to = update.message.reply_to_message
     if reply_to is not None:
         file = None
@@ -395,20 +387,31 @@ def _mirror(bot, update, isZip=False, extract=False, isQbit=False, isLeech=False
                 return
             else:
                 link = file.get_file().file_path
-    if link != '':
-        LOGGER.info(link)
+    if len(mesg) > 1:
+        try:
+            ussr = urllib.parse.quote(mesg[1], safe='')
+            pssw = urllib.parse.quote(mesg[2], safe='')
+            link = link.split("://", maxsplit=1)
+            link = f'{link[0]}://{ussr}:{pssw}@{link[1]}'
+        except:
+            pass
+    LOGGER.info(link)
     if bot_utils.is_url(link) and not bot_utils.is_magnet(link) and not os.path.exists(link) and isQbit:
-        resp = requests.get(link)
-        if resp.status_code == 200:
-            file_name = str(time.time()).replace(".", "") + ".torrent"
-            open(file_name, "wb").write(resp.content)
-            link = f"{file_name}"
-        else:
-            sendMessage(f"ERROR: link got HTTP response: {resp.status_code}", bot, update)
+        try:
+            resp = requests.get(link)
+            if resp.status_code == 200:
+                file_name = str(time.time()).replace(".", "") + ".torrent"
+                open(file_name, "wb").write(resp.content)
+                link = f"{file_name}"
+            else:
+                sendMessage(f"ERROR: link got HTTP response: {resp.status_code}", bot, update)
+                return
+        except:
+            LOGGER.error(f"Invalid Link {link}")
             return
 
     elif not bot_utils.is_url(link) and not bot_utils.is_magnet(link):
-        sendMessage('No download source provided', bot, update)
+        sendMessage('No download source provided, please give magnet/torrent', bot, update)
         return
     elif not os.path.exists(link) and not bot_utils.is_mega_link(link) and not bot_utils.is_gdrive_link(link) and not bot_utils.is_magnet(link):
         try:

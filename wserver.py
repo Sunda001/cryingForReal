@@ -2,8 +2,6 @@
 # (c) YashDK [yash-dk@github]
 # Redesigned By - @bipuldey19 (https://github.com/SlamDevs/slam-mirrorbot/commit/1e572f4fa3625ecceb953ce6d3e7cf7334a4d542#diff-c3d91f56f4c5d8b5af3d856d15a76bd5f00aa38d712691b91501734940761bdd)
 
-import os
-import time
 import logging
 import qbittorrentapi as qba
 import asyncio
@@ -556,27 +554,22 @@ section span{
 async def list_torrent_contents(request):
 
     torr = request.match_info["hash_id"]
-
     gets = request.query
 
     if "pin_code" not in gets.keys():
         rend_page = code_page.replace("{form_url}", f"/PublicLeech/files/{torr}")
         return web.Response(text=rend_page, content_type='text/html')
 
-    client = qba.Client(host="localhost", port="8090",
-                        username="admin", password="adminadmin")
-    client.auth_log_in()
+    client = qba.Client(host="localhost", port="8090")
     try:
         res = client.torrents_files(torrent_hash=torr)
     except qba.NotFound404Error:
         raise web.HTTPNotFound()
-    count = 0
     passw = ""
     for n in str(torr):
         if n.isdigit():
             passw += str(n)
-            count += 1
-        if count == 4:
+        if len(passw) == 4:
             break
     if isinstance(passw, bool):
         raise web.HTTPNotFound()
@@ -590,8 +583,7 @@ async def list_torrent_contents(request):
     nodes.create_list(par, cont)
 
     rend_page = page.replace("{My_content}", cont[0])
-    rend_page = rend_page.replace(
-        "{form_url}", f"/PublicLeech/files/{torr}?pin_code={pincode}")
+    rend_page = rend_page.replace("{form_url}", f"/PublicLeech/files/{torr}?pin_code={pincode}")
     client.auth_log_out()
     return web.Response(text=rend_page, content_type='text/html')
 
@@ -611,9 +603,7 @@ async def re_verfiy(paused, resumed, client, torr):
         verify = True
 
         for i in res:
-            if str(i.id) in paused:
-                if i.priority == 0:
-                    continue
+            if str(i.id) in paused and i.priority != 0:
                 verify = False
                 break
 
@@ -625,23 +615,20 @@ async def re_verfiy(paused, resumed, client, torr):
             break
         LOGGER.info("Reverification Failed: correcting stuff...")
         client.auth_log_out()
-        client = qba.Client(host="localhost", port="8090",
-                           username="admin", password="adminadmin")
-        client.auth_log_in()
+        await asyncio.sleep(1)
+        client = qba.Client(host="localhost", port="8090")
         try:
-            client.torrents_file_priority(
-                torrent_hash=torr, file_ids=paused, priority=0)
+            client.torrents_file_priority(torrent_hash=torr, file_ids=paused, priority=0)
         except:
             LOGGER.error("Errored in reverification paused")
         try:
-            client.torrents_file_priority(
-                torrent_hash=torr, file_ids=resumed, priority=1)
+            client.torrents_file_priority(torrent_hash=torr, file_ids=resumed, priority=1)
         except:
             LOGGER.error("Errored in reverification resumed")
-        client.auth_log_out()
         k += 1
-        if k > 4:
+        if k > 5:
             return False
+    client.auth_log_out()
     LOGGER.info("Verified")
     return True
 
@@ -650,9 +637,7 @@ async def re_verfiy(paused, resumed, client, torr):
 async def set_priority(request):
 
     torr = request.match_info["hash_id"]
-    client = qba.Client(host="localhost", port="8090",
-                        username="admin", password="adminadmin")
-    client.auth_log_in()
+    client = qba.Client(host="localhost", port="8090")
 
     data = await request.post()
     resume = ""
@@ -672,16 +657,14 @@ async def set_priority(request):
     resume = resume.strip("|")
 
     try:
-        client.torrents_file_priority(
-            torrent_hash=torr, file_ids=pause, priority=0)
+        client.torrents_file_priority(torrent_hash=torr, file_ids=pause, priority=0)
     except qba.NotFound404Error:
         raise web.HTTPNotFound()
     except:
         LOGGER.error("Errored in paused")
 
     try:
-        client.torrents_file_priority(
-            torrent_hash=torr, file_ids=resume, priority=1)
+        client.torrents_file_priority(torrent_hash=torr, file_ids=resume, priority=1)
     except qba.NotFound404Error:
         raise web.HTTPNotFound()
     except:
@@ -690,7 +673,6 @@ async def set_priority(request):
     await asyncio.sleep(2)
     if not await re_verfiy(pause, resume, client, torr):
         LOGGER.error("Verification Failed")
-    client.auth_log_out()
     return await list_torrent_contents(request)
 
 

@@ -5,6 +5,7 @@
 import os
 import logging
 import time
+import threading
 
 from pyrogram.errors import FloodWait
 
@@ -29,6 +30,7 @@ class TgUploader:
         self.uploaded_bytes = 0
         self.last_uploaded = 0
         self.start_time = time.time()
+        self.__resource_lock = threading.RLock()
         self.is_cancelled = False
         self.chat_id = listener.message.chat.id
         self.message_id = listener.uid
@@ -70,7 +72,7 @@ class TgUploader:
             os.rename(up_path, new_path)
             up_path = new_path
         else:
-            cap_mono = f"<code>{filee}</code>"
+            cap_mono = f"<code>{os.path.basename(filee)}</code>"
         notMedia = False
         thumb = self.thumb
         try:
@@ -150,9 +152,10 @@ class TgUploader:
         if self.is_cancelled:
             self.__app.stop_transmission()
             return
-        chunk_size = current - self.last_uploaded
-        self.last_uploaded = current
-        self.uploaded_bytes += chunk_size
+        with self.__resource_lock:
+            chunk_size = current - self.last_uploaded
+            self.last_uploaded = current
+            self.uploaded_bytes += chunk_size
 
     def user_settings(self):
         if self.user_id in AS_DOC_USERS:
