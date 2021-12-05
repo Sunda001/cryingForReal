@@ -13,18 +13,20 @@ import json
 import math
 import re
 import urllib.parse
+
 from os import popen
 from random import choice
 from urllib.parse import urlparse
-
 import lk21
 import requests, cfscrape
 from bs4 import BeautifulSoup
 from js2py import EvalJs
 from lk21.extractors.bypasser import Bypass
 from base64 import standard_b64encode
+
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.ext_utils.exceptions import DirectDownloadLinkException
+
 
 
 def direct_link_generator(link: str):
@@ -32,10 +34,10 @@ def direct_link_generator(link: str):
     if not link:
         raise DirectDownloadLinkException("No links found!")
     elif 'youtube.com' in link or 'youtu.be' in link:
-        raise DirectDownloadLinkException(f"Use /{BotCommands.WatchCommand} to mirror Youtube link\nUse /{BotCommands.TarWatchCommand} to make tar of Youtube playlist")
+        raise DirectDownloadLinkException(f"Use /{BotCommands.WatchCommand} to mirror Youtube link\nUse /{BotCommands.ZipWatchCommand} to make zip of Youtube playlist")
     elif 'zippyshare.com' in link:
         return zippy_share(link)
-    elif 'yadi.sk' in link:
+    elif 'yadi.sk' in link or 'disk.yandex.com' in link:
         return yandex_disk(link)
     elif 'mediafire.com' in link:
         return mediafire(link)
@@ -71,6 +73,8 @@ def direct_link_generator(link: str):
         return fembed(link)
     elif 'sbembed.com' in link:
         return sbembed(link)
+    elif 'watchsb.com' in link:
+        return sbembed(link)
     elif 'streamsb.net' in link:
         return sbembed(link)
     elif 'sbplay.org' in link:
@@ -98,7 +102,7 @@ def direct_link_generator(link: str):
 
 
 def zippy_share(url: str) -> str:
-    """ ZippyShare direct links generator
+    """ ZippyShare direct link generator
     Based on https://github.com/KenHV/Mirror-Bot
              https://github.com/jovanzers/WinTenCermin """
     try:
@@ -125,10 +129,10 @@ def zippy_share(url: str) -> str:
 
 
 def yandex_disk(url: str) -> str:
-    """ Yandex.Disk direct links generator
+    """ Yandex.Disk direct link generator
     Based on https://github.com/wldhx/yadisk-direct """
     try:
-        link = re.findall(r'\bhttps?://.*yadi\.sk\S+', url)[0]
+        link = re.findall(r'\b(https?://(yadi.sk|disk.yandex.com)\S+)', url)[0][0]
     except IndexError:
         return "No Yandex.Disk links found\n"
     api = 'https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key={}'
@@ -139,7 +143,7 @@ def yandex_disk(url: str) -> str:
 
 
 def uptobox(url: str) -> str:
-    """ Uptobox direct links generator
+    """ Uptobox direct link generator
     based on https://github.com/jovanzers/WinTenCermin """
     try:
         link = re.findall(r'\bhttps?://.*uptobox\.com\S+', url)[0]
@@ -162,7 +166,7 @@ def uptobox(url: str) -> str:
 
 
 def mediafire(url: str) -> str:
-    """ MediaFire direct links generator """
+    """ MediaFire direct link generator """
     try:
         link = re.findall(r'\bhttps?://.*mediafire\.com\S+', url)[0]
     except IndexError:
@@ -173,7 +177,7 @@ def mediafire(url: str) -> str:
 
 
 def osdn(url: str) -> str:
-    """ OSDN direct links generator """
+    """ OSDN direct link generator """
     osdn_link = 'https://osdn.net'
     try:
         link = re.findall(r'\bhttps?://.*osdn\.net\S+', url)[0]
@@ -301,7 +305,7 @@ def streamtape(url: str) -> str:
 
 
 def racaty(url: str) -> str:
-    """ Racaty direct links generator
+    """ Racaty direct link generator
     based on https://github.com/SlamDevs/slam-mirrorbot"""
     dl_url = ''
     try:
@@ -320,7 +324,7 @@ def racaty(url: str) -> str:
 
 
 def fichier(link: str) -> str:
-    """ 1Fichier direct links generator
+    """ 1Fichier direct link generator
     Based on https://github.com/Maujar
     """
     regex = r"^([http:\/\/|https:\/\/]+)?.*1fichier\.com\/\?.+"
@@ -380,7 +384,7 @@ def fichier(link: str) -> str:
 
 
 def solidfiles(url: str) -> str:
-    """ Solidfiles direct links generator
+    """ Solidfiles direct link generator
     Based on https://github.com/Xonshiz/SolidFiles-Downloader
     By https://github.com/Jusidama18 """
     headers = {
@@ -392,7 +396,7 @@ def solidfiles(url: str) -> str:
 
 
 def krakenfiles(page_link: str) -> str:
-    """ krakenfiles direct links generator
+    """ krakenfiles direct link generator
     Based on https://github.com/tha23rd/py-kraken
     By https://github.com/junedkh """
     page_resp = requests.session().get(page_link)
@@ -406,7 +410,7 @@ def krakenfiles(page_link: str) -> str:
         item["data-file-hash"]
         for item in soup.find_all("div", attrs={"data-file-hash": True})
     ]
-    if len(hashes) < 1:
+    if not hashes:
         raise DirectDownloadLinkException(
             f"Hash not found for : {page_link}")
 
