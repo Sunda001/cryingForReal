@@ -23,9 +23,8 @@ python-dotenv
 python-magic
 python-telegram-bot
 qbittorrent-api
-speedtest-cli
 requests
-
+speedtest-cli
 telegraph
 tenacity
 TgCrypto
