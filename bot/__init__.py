@@ -225,6 +225,14 @@ except KeyError:
     MEGA_EMAIL_ID = None
     MEGA_PASSWORD = None
 try:
+    STORAGE_THRESHOLD = getConfig('STORAGE_THRESHOLD')
+    if len(STORAGE_THRESHOLD) == 0:
+        raise KeyError
+    else:
+        STORAGE_THRESHOLD = float(STORAGE_THRESHOLD)
+except KeyError:
+    STORAGE_THRESHOLD = None
+try:
     UPTOBOX_TOKEN = getConfig('UPTOBOX_TOKEN')
     if len(UPTOBOX_TOKEN) == 0:
         raise KeyError
