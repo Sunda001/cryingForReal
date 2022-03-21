@@ -15,7 +15,7 @@ from .mirror import MirrorListener
 
 listener_dict = {}
 
-def _watch(bot, message, isZip=False, isLeech=False):
+def _ytdl(bot, message, isZip=False, isLeech=False):
     mssg = message.text
     user_id = message.from_user.id
     msg_id = message.message_id
@@ -250,10 +250,10 @@ def _auto_cancel(msg, msg_id):
         pass
 
 def ytdlb(update, context):
-    _watch(context.bot, update.message, isLeech=True)
+    _ytdl(context.bot, update.message, isLeech=True)
 
 def ytdlbz(update, context):
-    _watch(context.bot, update.message, True)
+    _ytdl(context.bot, update.message, True)
 
 
 ytdlb_handler = CommandHandler(BotCommands.YtdlbCommand, ytdlb,
