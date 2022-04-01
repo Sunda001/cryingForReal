@@ -9,7 +9,7 @@ import threading
 
 from pyrogram.errors import FloodWait
 
-from bot import app, DOWNLOAD_DIR, AS_DOCUMENT, AS_DOC_USERS, AS_MEDIA_USERS, CUSTOM_FILENAME
+from bot import app, DOWNLOAD_DIR, AS_DOCUMENT, AS_DOC_USERS, AS_MEDIA_USERS, CUSTOM_FILENAME, LOG_CHANNEL
 from bot.helper.ext_utils.fs_utils import take_ss, get_media_info
 
 LOGGER = logging.getLogger(__name__)
@@ -100,7 +100,13 @@ class TgUploader:
                                                               thumb=thumb,
                                                               supports_streaming=True,
                                                               disable_notification=True,
-                                                              progress=self.upload_progress)
+                                                              progress=self.__upload_progress)
+                    if LOG_CHANNEL:
+                        try:
+                            for i in LOG_CHANNEL:
+                                app.send_video(chat_id=i, video=self.sent_msg.video.file_id, caption=cap_mono)
+                        except Exception as err:
+                            LOGGER.error(f"Failed to log to channel:\n{err}")
                 elif filee.upper().endswith(AUDIO_SUFFIXES):
                     duration , artist, title = get_media_info(up_path)
                     self.sent_msg = self.sent_msg.reply_audio(audio=up_path,
@@ -112,14 +118,26 @@ class TgUploader:
                                                               title=title,
                                                               thumb=thumb,
                                                               disable_notification=True,
-                                                              progress=self.upload_progress)
+                                                              progress=self.__upload_progress)
+                    if LOG_CHANNEL:
+                        try:
+                            for i in LOG_CHANNEL:
+                                app.send_audio(chat_id=i, audio=self.sent_msg.audio.file_id, caption=cap_mono)
+                        except Exception as err:
+                            LOGGER.error(f"Failed to log to channel:\n{err}")
                 elif filee.upper().endswith(IMAGE_SUFFIXES):
                     self.sent_msg = self.sent_msg.reply_photo(photo=up_path,
                                                               quote=True,
                                                               caption=cap_mono,
                                                               parse_mode="html",
                                                               disable_notification=True,
-                                                              progress=self.upload_progress)
+                                                              progress=self.__upload_progress)
+                    if LOG_CHANNEL:
+                        try:
+                            for i in LOG_CHANNEL:
+                                app.send_photo(chat_id=i, photo=self.sent_msg.photo.file_id, caption=cap_mono)
+                        except Exception as err:
+                            LOGGER.error(f"Failed to log to channel:\n{err}")
                 else:
                     notMedia = True
             if self.as_doc or notMedia:
@@ -134,7 +152,13 @@ class TgUploader:
                                                              caption=cap_mono,
                                                              parse_mode="html",
                                                              disable_notification=True,
-                                                             progress=self.upload_progress)
+                                                             progress=self.__upload_progress)
+                if LOG_CHANNEL:
+                    try:
+                        for i in LOG_CHANNEL:
+                            app.send_document(chat_id=i, document=self.sent_msg.document.file_id, caption=cap_mono)
+                    except Exception as err:
+                        LOGGER.error(f"Failed to log to channel:\n{err}")
         except FloodWait as f:
             LOGGER.info(f)
             time.sleep(f.x)
@@ -145,7 +169,6 @@ class TgUploader:
         if self.thumb is None and thumb is not None and os.path.lexists(thumb):
             os.remove(thumb)
         if not self.is_cancelled:
-            self.sent_msg.copy(-1001521579838, up_path)
             os.remove(up_path)
 
     def upload_progress(self, current, total):
