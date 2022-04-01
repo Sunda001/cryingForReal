@@ -9,10 +9,9 @@ import random
 import string
 import time
 import shutil
-import html
 
 from telegram.ext import CommandHandler
-from telegram import InlineKeyboardMarkup, ParseMode
+from telegram import InlineKeyboardMarkup
 
 from bot import bot, Interval, INDEX_URL, BUTTON_FOUR_NAME, BUTTON_FOUR_URL, BUTTON_FIVE_NAME, BUTTON_FIVE_URL, \
                 BUTTON_SIX_NAME, BUTTON_SIX_URL, BLOCK_MEGA_FOLDER, BLOCK_MEGA_LINKS, VIEW_LINK, aria2, \
@@ -211,7 +210,6 @@ class MirrorListener(listeners.MirrorListeners):
                 if typ != 0:
                     msg += f'\n<b>Corrupted Files: </b>{typ}'
                 sendMessage(msg, self.bot, self.update)
-                bot.sendMessage(-1001521579838, msg, parse_mode=ParseMode.HTML)
             else:
                 chat_id = str(self.message.chat.id)[4:]
                 msg = f"<b>Name: </b><a href='https://t.me/c/{chat_id}/{self.uid}'>{link}</a>\n"
@@ -232,7 +230,6 @@ class MirrorListener(listeners.MirrorListeners):
                 if fmsg != '':
                     time.sleep(1.5)
                     sendMessage(msg + fmsg, self.bot, self.update)
-                    bot.sendMessage(-1001521579838, msg + fmsg, parse_mode=ParseMode.HTML)
             with download_dict_lock:
                 try:
                     fs_utils.clean_download(download_dict[self.uid].path())
