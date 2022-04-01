@@ -100,7 +100,7 @@ class TgUploader:
                                                               thumb=thumb,
                                                               supports_streaming=True,
                                                               disable_notification=True,
-                                                              progress=self.__upload_progress)
+                                                              progress=self.upload_progress)
                     if LOG_CHANNEL:
                         try:
                             for i in LOG_CHANNEL:
@@ -118,7 +118,7 @@ class TgUploader:
                                                               title=title,
                                                               thumb=thumb,
                                                               disable_notification=True,
-                                                              progress=self.__upload_progress)
+                                                              progress=self.upload_progress)
                     if LOG_CHANNEL:
                         try:
                             for i in LOG_CHANNEL:
@@ -131,7 +131,7 @@ class TgUploader:
                                                               caption=cap_mono,
                                                               parse_mode="html",
                                                               disable_notification=True,
-                                                              progress=self.__upload_progress)
+                                                              progress=self.upload_progress)
                     if LOG_CHANNEL:
                         try:
                             for i in LOG_CHANNEL:
@@ -152,7 +152,7 @@ class TgUploader:
                                                              caption=cap_mono,
                                                              parse_mode="html",
                                                              disable_notification=True,
-                                                             progress=self.__upload_progress)
+                                                             progress=self.upload_progress)
                 if LOG_CHANNEL:
                     try:
                         for i in LOG_CHANNEL:
