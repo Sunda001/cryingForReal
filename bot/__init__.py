@@ -91,8 +91,7 @@ aria2 = aria2p.API(
 )
 
 def get_client() -> qba.TorrentsAPIMixIn:
-    qb_client = qba.Client(host="localhost", port=8090)
-    return qb_client
+    return qba.Client(host="localhost", port=8090)
 
 """
 trackers = subprocess.check_output(["curl -Ns https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/all.txt https://ngosang.github.io/trackerslist/trackers_all_http.txt https://newtrackon.com/api/all | awk '$0'"], shell=True).decode('utf-8')
@@ -101,6 +100,7 @@ trackerslist.remove("")
 trackerslist = "\n\n".join(trackerslist)
 get_client().application.set_preferences({"add_trackers":f"{trackerslist}"})
 """
+
 
 
 DOWNLOAD_DIR = None
@@ -119,6 +119,7 @@ AUTHORIZED_CHATS = set()
 SUDO_USERS = set()
 AS_DOC_USERS = set()
 AS_MEDIA_USERS = set()
+LOG_CHANNEL = set()
 if os.path.exists('authorized_chats.txt'):
     with open('authorized_chats.txt', 'r+') as f:
         lines = f.readlines()
@@ -148,7 +149,7 @@ try:
     parent_id = getConfig('GDRIVE_FOLDER_ID')
     DOWNLOAD_DIR = getConfig('DOWNLOAD_DIR')
     if not DOWNLOAD_DIR.endswith("/"):
-        DOWNLOAD_DIR = DOWNLOAD_DIR + '/'
+        DOWNLOAD_DIR = f'{DOWNLOAD_DIR}/'
     DOWNLOAD_STATUS_UPDATE_INTERVAL = int(getConfig('DOWNLOAD_STATUS_UPDATE_INTERVAL'))
     OWNER_ID = int(getConfig('OWNER_ID'))
     AUTO_DELETE_MESSAGE_DURATION = int(getConfig('AUTO_DELETE_MESSAGE_DURATION'))
@@ -183,6 +184,19 @@ if DB_URI is not None:
     finally:
         cur.close()
         conn.close()
+
+if os.path.exists("log_channel.txt"):
+    with open("logs_chat.txt", "r+") as f:
+        lines = f.readlines()
+        for line in lines:
+            LOG_CHANNEL.add(int(line.split()[0]))
+try:
+    achats = getConfig("LOG_CHANNEL")
+    achats = achats.split(" ")
+    for chats in achats:
+        LOG_CHANNEL.add(int(chats))
+except:
+    logging.warning('Log Channel Details not provided!')
 
 LOGGER.info("Generating USER_SESSION_STRING")
 app = Client('PublicLeech', api_id=int(TELEGRAM_API), api_hash=TELEGRAM_HASH, bot_token=BOT_TOKEN, workers=343)

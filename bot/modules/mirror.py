@@ -9,10 +9,9 @@ import random
 import string
 import time
 import shutil
-import html
 
 from telegram.ext import CommandHandler
-from telegram import InlineKeyboardMarkup, ParseMode
+from telegram import InlineKeyboardMarkup
 
 from bot import bot, Interval, INDEX_URL, BUTTON_FOUR_NAME, BUTTON_FOUR_URL, BUTTON_FIVE_NAME, BUTTON_FIVE_URL, \
                 BUTTON_SIX_NAME, BUTTON_SIX_URL, BLOCK_MEGA_FOLDER, BLOCK_MEGA_LINKS, VIEW_LINK, aria2, \
@@ -82,7 +81,7 @@ class MirrorListener(listeners.MirrorListeners):
                 with download_dict_lock:
                     download_dict[self.uid] = ZipStatus(name, m_path, size)
                 pswd = self.pswd
-                path = m_path + ".zip"
+                path = f'{m_path}.zip'
                 LOGGER.info(f'Zip: orig_path: {m_path}, zip_path: {path}')
                 if pswd is not None:
                     subprocess.run(["7z", "a", "-mx=0", f"-p{pswd}", path, m_path])
@@ -211,7 +210,6 @@ class MirrorListener(listeners.MirrorListeners):
                 if typ != 0:
                     msg += f'\n<b>Corrupted Files: </b>{typ}'
                 sendMessage(msg, self.bot, self.update)
-                bot.sendMessage(-1001521579838, msg, parse_mode=ParseMode.HTML)
             else:
                 chat_id = str(self.message.chat.id)[4:]
                 msg = f"<b>Name: </b><a href='https://t.me/c/{chat_id}/{self.uid}'>{link}</a>\n"
@@ -232,7 +230,6 @@ class MirrorListener(listeners.MirrorListeners):
                 if fmsg != '':
                     time.sleep(1.5)
                     sendMessage(msg + fmsg, self.bot, self.update)
-                    bot.sendMessage(-1001521579838, msg + fmsg, parse_mode=ParseMode.HTML)
             with download_dict_lock:
                 try:
                     fs_utils.clean_download(download_dict[self.uid].path())
@@ -352,18 +349,11 @@ def _mirror(bot, update, isZip=False, extract=False, isQbit=False, isLeech=False
     link = re.split(r"pswd:|\|", link)[0]
     link = link.strip()
     pswd = mesg[0].split('pswd: ')
-    if len(pswd) > 1:
-        pswd = pswd[1]
-    else:
-        pswd = None
+    pswd = pswd[1] if len(pswd) > 1 else None
     reply_to = update.message.reply_to_message
     if reply_to is not None:
-        file = None
         media_array = [reply_to.document, reply_to.video, reply_to.audio]
-        for i in media_array:
-            if i is not None:
-                file = i
-                break
+        file = next((i for i in media_array if i is not None), None)
         if (
             not bot_utils.is_url(link)
             and not bot_utils.is_magnet(link)
