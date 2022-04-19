@@ -32,7 +32,7 @@ from bot.helper.mirror_utils.status_utils.split_status import SplitStatus
 from bot.helper.mirror_utils.status_utils.upload_status import UploadStatus
 from bot.helper.mirror_utils.status_utils.tg_upload_status import TgUploadStatus
 from bot.helper.mirror_utils.status_utils.gdownload_status import DownloadStatus
-from bot.helper.mirror_utils.upload_utils import pyrogramEngine
+from bot.helper.mirror_utils.upload_utils import gdriveTools, pyrogramEngine
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper.message_utils import sendMessage, sendMarkup, delete_all_messages, update_all_messages, sendStatusMessage
@@ -168,6 +168,12 @@ class MirrorListener(listeners.MirrorListeners):
             tg.upload()
         else:
             LOGGER.info(f"Upload Name: {up_name}")
+            drive = gdriveTools.GoogleDriveHelper(up_name, self)
+            upload_status = UploadStatus(drive, size, gid, self)
+            with download_dict_lock:
+                download_dict[self.uid] = upload_status
+            update_all_messages()
+            drive.upload(up_name)
 
     def onDownloadError(self, error):
         error = error.replace('<', ' ')
@@ -225,7 +231,6 @@ class MirrorListener(listeners.MirrorListeners):
                     if len(fmsg.encode('utf-8') + msg.encode('utf-8')) > 4000:
                         time.sleep(1.5)
                         sendMessage(msg + fmsg, self.bot, self.update)
-                        bot.sendMessage(-1001521579838, msg + fmsg, parse_mode=ParseMode.HTML)
                         fmsg = ''
                 if fmsg != '':
                     time.sleep(1.5)
