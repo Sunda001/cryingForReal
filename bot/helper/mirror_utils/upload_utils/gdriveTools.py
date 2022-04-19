@@ -221,9 +221,7 @@ class GoogleDriveHelper:
         drive_file = self.__service.files().create(supportsTeamDrives=True,
                                                    body=file_metadata, media_body=media_body)
         response = None
-        while response is None:
-            if self.is_cancelled:
-                break
+        while response is None and not self.is_cancelled:
             try:
                 self.status, response = drive_file.next_chunk()
             except HttpError as err:
@@ -263,7 +261,7 @@ class GoogleDriveHelper:
         file_dir = f"{DOWNLOAD_DIR}{self.__listener.message.message_id}"
         file_path = f"{file_dir}/{file_name}"
         size = get_readable_file_size(get_path_size(file_path))
-        LOGGER.info("Uploading File: " + file_path)
+        LOGGER.info(f"Uploading File: {file_path}")
         self.updater = setInterval(self.update_interval, self._on_upload_progress)
         if os.path.isfile(file_path):
             try:
@@ -273,7 +271,7 @@ class GoogleDriveHelper:
                     return
                 if link is None:
                     raise Exception('Upload has been manually cancelled')
-                LOGGER.info("Uploaded To G-Drive: " + file_path)
+                LOGGER.info(f"Uploaded To G-Drive: {file_path}")
             except Exception as e:
                 if isinstance(e, RetryError):
                     LOGGER.info(f"Total Attempts: {e.last_attempt.attempt_number}")
@@ -299,7 +297,7 @@ class GoogleDriveHelper:
                     msg = self.deletefile(link)
                     LOGGER.info(f"{msg}")
                     return
-                LOGGER.info("Uploaded To G-Drive: " + file_name)
+                LOGGER.info(f"Uploaded To G-Drive: {file_name}")
             except Exception as e:
                 if isinstance(e, RetryError):
                     LOGGER.info(f"Total Attempts: {e.last_attempt.attempt_number}")
@@ -471,9 +469,9 @@ class GoogleDriveHelper:
                 err = err.last_attempt.exception()
             err = str(err).replace('>', '').replace('<', '')
             LOGGER.error(err)
-            if "User rate limit exceeded" in str(err):
+            if "User rate limit exceeded" in err:
                 msg = "User rate limit exceeded."
-            elif "File not found" in str(err):
+            elif "File not found" in err:
                 msg = "File not found."
             else:
                 msg = f"Error.\n{err}"
@@ -828,7 +826,7 @@ class GoogleDriveHelper:
         except Exception as err:
             err = str(err).replace('>', '').replace('<', '')
             LOGGER.error(err)
-            msg = "File not found." if "File not found" in str(err) else f"Error.\n{err}"
+            msg = "File not found." if "File not found" in err else f"Error.\n{err}"
             return msg
         return msg
 
@@ -879,7 +877,7 @@ class GoogleDriveHelper:
         except Exception as err:
             err = str(err).replace('>', '').replace('<', '')
             LOGGER.error(err)
-            msg = "File not found." if "File not found" in str(err) else f"Error.\n{err}"
+            msg = "File not found." if "File not found" in err else f"Error.\n{err}"
             return msg, "", "", ""
         return "", clonesize, name, files
 
@@ -901,7 +899,7 @@ class GoogleDriveHelper:
         except Exception as err:
             err = str(err).replace('>', '').replace('<', '')
             LOGGER.error(err)
-            if "downloadQuotaExceeded" in str(err):
+            if "downloadQuotaExceeded" in err:
                 err = "Download Quota Exceeded."
             self.__listener.onDownloadError(err)
             return
@@ -915,7 +913,7 @@ class GoogleDriveHelper:
     def download_folder(self, folder_id, path, folder_name):
         if not os.path.exists(path + folder_name):
             os.makedirs(path + folder_name)
-        path += folder_name + '/'
+        path += f'{folder_name}/'
         result = []
         page_token = None
         while True:
@@ -951,7 +949,7 @@ class GoogleDriveHelper:
     def download_file(self, file_id, path, filename, mime_type):
         request = self.__service.files().get_media(fileId=file_id)
         filename = filename.replace('/', '')
-        fh = io.FileIO('{}{}'.format(path, filename), 'wb')
+        fh = io.FileIO(f'{path}{filename}', 'wb')
         downloader = MediaIoBaseDownload(fh, request, chunksize = 65 * 1024 * 1024)
         done = False
         while not done:
