@@ -17,7 +17,7 @@ pillow
 psutil
 psycopg2-binary
 pybase64
-pyrogram
+pyrogram==1.4.16
 pyshorteners
 python-dotenv
 python-magic
