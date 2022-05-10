@@ -19,7 +19,7 @@ from bot.helper.telegram_helper.message_utils import sendMessage, sendMarkup, ed
 from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time
 from .helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper import button_build
-from .modules import authorize, mirror_status, mirror, watch, shell, eval, speedtest, leech_settings, cancel_mirror
+from .modules import authorize, mirror_status, mirror, watch, shell, eval, leech_settings, cancel_mirror
 from datetime import date
 
 today = date.today()
