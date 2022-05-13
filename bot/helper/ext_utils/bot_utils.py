@@ -138,12 +138,12 @@ def get_readable_message():
                 msg += f"\n<b>Speed:</b> {download.speed()} | <b>ETA:</b> {download.eta()}"
                 try:
                     msg += f"\n<b>Seeders:</b> {download.aria_download().num_seeders}" \
-                           f" | <b>Peers:</b> {download.aria_download().connections}\n⚙️ Engine: Aria2c"
+                           f" | <b>Peers:</b> {download.aria_download().connections}\n<b>⚙️ Engine:    Aria2c<\b>"
                 except:
                     pass
                 try:
                     msg += f"\n<b>Seeders:</b> {download.torrent_info().num_seeds}" \
-                           f" | <b>Leechers:</b> {download.torrent_info().num_leechs}\n⚙️ Engine: qbit"
+                           f" | <b>Leechers:</b> {download.torrent_info().num_leechs}\n<b>⚙️ Engine:   **qbit<\b>"
                 except:
                     pass
                 msg += f'\n<b>𝐔𝐬𝐞𝐫 :</b> <a href="tg://user?id={download.message.from_user.id}">{download.message.from_user.first_name}</a> (<code>{download.message.from_user.id}</code>)'
