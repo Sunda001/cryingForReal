@@ -117,7 +117,7 @@ def update_all_messages():
                 status_reply_dict[chat_id].text = msg
 
 
-def sendStatusMessage(msg, bot):
+def sendStatusMessage(msg, bot, chat):
     if len(Interval) == 0:
         Interval.append(setInterval(DOWNLOAD_STATUS_UPDATE_INTERVAL, update_all_messages))
     total, used, free = shutil.disk_usage('.')
