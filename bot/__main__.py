@@ -24,8 +24,6 @@ from .modules import authorize, mirror_status, mirror, watch, shell, eval, leech
 from datetime import date, datetime
 
 today = date.today()
-kek = datetime.now(pytz.timezone(f'Asia/Kolkata'))
-vro = kek.strftime('\n 𝗗𝗮𝘁𝗲 : %d/%m/%Y\n 𝗧𝗶𝗺𝗲: %I:%M%P')
 
 def stats(update, context):
     currentTime = get_readable_time(time.time() - botStartTime)
@@ -165,7 +163,9 @@ def main():
         os.remove(".restartmsg")
     elif OWNER_ID:
         try:
-            text = "𝐁𝐎𝐓 𝐑𝐄𝐒𝐓𝐀𝐑𝐓𝐄𝐃 \n{vro}\n\n 𝗧𝗶𝗺𝗲 𝗭𝗼𝗻𝗲 : {Asia/Kolkata}\n\nρℓєαѕє ѕтαят уσυя ∂σωиℓσα∂ѕ αgαιи!\n\n#Restarted"
+            kek = datetime.now(pytz.timezone(f'Asia/Kolkata'))
+            vro = kek.strftime('\n 𝗗𝗮𝘁𝗲 : %d/%m/%Y\n 𝗧𝗶𝗺𝗲: %I:%M%P')
+            text = f" 𝐁𝐎𝐓 𝐑𝐄𝐒𝐓𝐀𝐑𝐓𝐄𝐃 \n{vro}\n\nρℓєαѕє ѕтαят уσυя ∂σωиℓσα∂ѕ αgαιи!\n\n#Restarted"
             bot.sendMessage(chat_id=OWNER_ID, text=text, parse_mode=ParseMode.HTML)
             if AUTHORIZED_CHATS:
                 for i in AUTHORIZED_CHATS:
