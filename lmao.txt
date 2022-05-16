@@ -21,7 +21,7 @@ pyrogram==1.4.16
 pyshorteners
 python-dotenv
 python-magic
-python-telegram-bot
+python-telegram-bot==13.8.1
 qbittorrent-api
 requests
 telegraph
