@@ -145,7 +145,7 @@ def sendStatusMessage(msg, bot):
         progress += f"\n<b>RAM:</b> {psutil.virtual_memory().percent}% | <b>UPTIME:</b> {currentTime}" \
                     f"\n<b>DL:</b> {dlspeed}/s | <b>UL:</b> {ulspeed}/s"
     with status_reply_dict_lock:
-        if msg.message.chat.id in list(status_reply_dict.keys()):
+        if hasattr(msg.message, chat) and msg.message.chat.id in list(status_reply_dict.keys()):
             try:
                 message = status_reply_dict[msg.message.chat.id]
                 deleteMessage(bot, message)
